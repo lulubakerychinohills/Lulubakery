@@ -1,0 +1,137 @@
+[
+  {
+    "id": "mens-coffee",
+    "category": "men",
+    "title": "咖啡坚果绅士蛋糕",
+    "titleI18n": {
+      "zh": "咖啡坚果绅士蛋糕",
+      "en": "Coffee & Nut Gentleman's Cake",
+      "es": "Pastel de Cafe y Nueces para Caballero"
+    },
+    "descriptionI18n": {
+      "zh": "咖啡奶油搭配坚果脆粒，甜度平衡，口感成熟。",
+      "en": "Coffee cream with crunchy nuts, balanced sweetness and rich layers.",
+      "es": "Crema de cafe con nueces crujientes, dulzor equilibrado y sabor intenso."
+    }
+  },
+  {
+    "id": "mens-choco",
+    "category": "men",
+    "title": "黑巧威士忌风味蛋糕",
+    "titleI18n": {
+      "zh": "黑巧威士忌风味蛋糕",
+      "en": "Dark Chocolate Whiskey Style Cake",
+      "es": "Pastel de Chocolate Negro Estilo Whisky"
+    },
+    "descriptionI18n": {
+      "zh": "黑巧可可与轻酒香结合，层次偏浓郁。",
+      "en": "Dark cocoa with light whiskey aroma, deep and bold flavor.",
+      "es": "Cacao oscuro con un toque de whisky, sabor profundo y elegante."
+    }
+  },
+  {
+    "id": "ladies-strawberry",
+    "category": "women",
+    "title": "草莓奶油生日蛋糕",
+    "titleI18n": {
+      "zh": "草莓奶油生日蛋糕",
+      "en": "Strawberry Cream Birthday Cake",
+      "es": "Pastel de Cumpleanos con Crema y Fresas"
+    },
+    "descriptionI18n": {
+      "zh": "轻盈奶油搭配新鲜草莓，适合生日与纪念日。",
+      "en": "Light cream with fresh strawberries, perfect for celebrations.",
+      "es": "Crema ligera con fresas frescas, ideal para celebraciones."
+    }
+  },
+  {
+    "id": "ladies-mango",
+    "category": "women",
+    "title": "芒果慕斯花束蛋糕",
+    "titleI18n": {
+      "zh": "芒果慕斯花束蛋糕",
+      "en": "Mango Mousse Bouquet Cake",
+      "es": "Pastel Bouquet de Mousse de Mango"
+    },
+    "descriptionI18n": {
+      "zh": "酸甜芒果果香，外观精致，适合庆祝和送礼。",
+      "en": "Fresh mango aroma with elegant look, great for gifts.",
+      "es": "Aroma fresco de mango y aspecto elegante, ideal para regalar."
+    }
+  },
+  {
+    "id": "elderly-jujube",
+    "category": "senior",
+    "title": "红枣核桃养生蛋糕",
+    "titleI18n": {
+      "zh": "红枣核桃养生蛋糕",
+      "en": "Jujube Walnut Wellness Cake",
+      "es": "Pastel Saludable de Datiles y Nuez"
+    },
+    "descriptionI18n": {
+      "zh": "口感松软，甜度可低糖，适合长辈。",
+      "en": "Soft texture and low-sugar friendly, ideal for seniors.",
+      "es": "Textura suave y opcion baja en azucar, ideal para mayores."
+    }
+  },
+  {
+    "id": "elderly-taro",
+    "category": "senior",
+    "title": "芋泥轻乳酪蛋糕",
+    "titleI18n": {
+      "zh": "芋泥轻乳酪蛋糕",
+      "en": "Light Taro Cheesecake",
+      "es": "Cheesecake Ligero de Taro"
+    },
+    "descriptionI18n": {
+      "zh": "香气温和，绵密不腻，支持低糖定制。",
+      "en": "Gentle aroma and smooth texture with low-sugar options.",
+      "es": "Aroma suave y textura cremosa con opcion baja en azucar."
+    }
+  },
+  {
+    "id": "kids-oreo",
+    "category": "kids",
+    "title": "奥利奥星球蛋糕",
+    "titleI18n": {
+      "zh": "奥利奥星球蛋糕",
+      "en": "Oreo Planet Cake",
+      "es": "Pastel Planeta de Oreo"
+    },
+    "descriptionI18n": {
+      "zh": "巧克力奶油与饼干碎组合，孩子接受度高。",
+      "en": "Chocolate cream with cookie crumbs, loved by kids.",
+      "es": "Crema de chocolate con galleta triturada, favorito de ninos."
+    }
+  },
+  {
+    "id": "kids-rainbow",
+    "category": "kids",
+    "title": "彩虹动物主题蛋糕",
+    "titleI18n": {
+      "zh": "彩虹动物主题蛋糕",
+      "en": "Rainbow Animal Theme Cake",
+      "es": "Pastel Tematico de Animales Arcoiris"
+    },
+    "descriptionI18n": {
+      "zh": "色彩明亮，可加卡通元素，适合儿童派对。",
+      "en": "Bright colors with cartoon elements for kids parties.",
+      "es": "Colores vivos y elementos de dibujos para fiestas infantiles."
+    }
+  },
+  {
+    "id": "dessert-tiramisu",
+    "category": "women",
+    "title": "提拉米苏",
+    "titleI18n": {
+      "zh": "提拉米苏",
+      "en": "Tiramisu",
+      "es": "Tiramisu"
+    },
+    "descriptionI18n": {
+      "zh": "马斯卡彭与咖啡酒香，口感浓郁顺滑。",
+      "en": "Mascarpone with coffee aroma, smooth and rich.",
+      "es": "Mascarpone con aroma de cafe, textura suave e intensa."
+    }
+  }
+]
