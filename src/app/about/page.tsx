@@ -88,19 +88,19 @@ export default function AboutPage() {
   const t = copy[language];
 
   return (
-    <main className="min-h-screen bg-linear-to-b from-pink-50 via-rose-50 to-amber-50 py-10 text-zinc-800">
+    <main className="min-h-screen bg-linear-to-b from-[#F8F7F5] via-[#F6F5F2] to-[#F3F1ED] py-10 text-zinc-800">
       <div className="mx-auto max-w-4xl px-6">
-        <section className="rounded-2xl bg-linear-to-r from-rose-200 via-pink-200 to-amber-200 p-8 shadow-sm">
+        <section className="rounded-2xl bg-linear-to-r from-[#E7E3DE] via-[#E3DED8] to-[#DED8D0] p-8 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold text-rose-700">Lulu Bakery</p>
-              <p className="text-xs text-rose-800/80">Chino Hills</p>
+              <p className="text-sm font-semibold text-[#4C403A]">Lulu Bakery</p>
+              <p className="text-xs text-[#6A5D56]">Chino Hills</p>
             </div>
             <select
               aria-label="Select language"
               value={language}
               onChange={(event) => setLanguage(event.target.value as Language)}
-              className="rounded-full border border-rose-300 bg-white px-4 py-1.5 text-sm font-semibold text-rose-700 outline-none transition focus:border-rose-500"
+              className="rounded-full border border-[#D8D2C9] bg-white px-4 py-1.5 text-sm font-semibold text-[#4C403A] outline-none transition focus:border-[#8B776A]"
             >
               {(["en", "zh", "es"] as Language[]).map((lang) => (
                 <option key={lang} value={lang}>
@@ -111,35 +111,35 @@ export default function AboutPage() {
           </div>
 
           <h1 className="mt-4 text-3xl font-bold sm:text-4xl">{t.title}</h1>
-          <p className="mt-2 text-sm font-semibold text-rose-800">{t.subtitle}</p>
+          <p className="mt-2 text-sm font-semibold text-[#5E524B]">{t.subtitle}</p>
           <p className="mt-4 max-w-3xl text-zinc-700">{t.intro}</p>
         </section>
 
         <section className="mt-8 grid gap-4">
-          <article className="rounded-xl border border-rose-200 bg-white p-5 shadow-sm">
+          <article className="rounded-xl border border-[#D8D2C9] bg-white p-5 shadow-sm">
             <h2 className="text-lg font-semibold">{t.licensedTitle}</h2>
             <p className="mt-2 text-sm text-zinc-700">{t.licensedBody}</p>
           </article>
-          <article className="rounded-xl border border-rose-200 bg-white p-5 shadow-sm">
+          <article className="rounded-xl border border-[#D8D2C9] bg-white p-5 shadow-sm">
             <h2 className="text-lg font-semibold">{t.ingredientsTitle}</h2>
             <p className="mt-2 text-sm text-zinc-700">{t.ingredientsBody}</p>
           </article>
-          <article className="rounded-xl border border-rose-200 bg-white p-5 shadow-sm">
+          <article className="rounded-xl border border-[#D8D2C9] bg-white p-5 shadow-sm">
             <h2 className="text-lg font-semibold">{t.occasionsTitle}</h2>
             <p className="mt-2 text-sm text-zinc-700">{t.occasionsBody}</p>
           </article>
-          <article className="rounded-xl border border-rose-200 bg-white p-5 shadow-sm">
+          <article className="rounded-xl border border-[#D8D2C9] bg-white p-5 shadow-sm">
             <h2 className="text-lg font-semibold">{t.pickupTitle}</h2>
             <p className="mt-2 text-sm text-zinc-700">{t.pickupBody}</p>
           </article>
-          <article className="rounded-xl border border-rose-200 bg-white p-5 shadow-sm">
+          <article className="rounded-xl border border-[#D8D2C9] bg-white p-5 shadow-sm">
             <h2 className="text-lg font-semibold">{t.locationContactTitle}</h2>
             <p className="mt-2 text-sm text-zinc-700">
               <span className="font-semibold">{t.locationLabel}:</span> {t.locationBody}
             </p>
             <p className="mt-1 text-sm text-zinc-700">
               <span className="font-semibold">{t.contactLabel}:</span>{" "}
-              <a href={`mailto:${t.contactBody}`} className="text-rose-700 underline">
+              <a href={`mailto:${t.contactBody}`} className="text-[#5C4B43] underline">
                 {t.contactBody}
               </a>
             </p>
@@ -149,7 +149,7 @@ export default function AboutPage() {
         <div className="mt-8">
           <Link
             href="/"
-            className="inline-flex rounded-full bg-rose-500 px-5 py-2 text-sm font-semibold text-white transition hover:bg-rose-600"
+            className="inline-flex rounded-full bg-[#5C4B43] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#4D3F38]"
           >
             {t.cta}
           </Link>

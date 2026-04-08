@@ -38,8 +38,19 @@ export async function POST(request: Request) {
       notes: toStr(body.notes),
     };
 
-    if (!payload.name || !payload.productCategory || !payload.productName) {
-      return NextResponse.json({ message: "姓名、分类和蛋糕款式为必填项。" }, { status: 400 });
+    if (!payload.name) {
+      return NextResponse.json({ message: "请填写姓名。" }, { status: 400 });
+    }
+
+    const hasProductSelection = Boolean(payload.productCategory && payload.productName);
+    const hasReferenceImage = Boolean(payload.referenceImageUrl);
+
+    if (!hasProductSelection && !hasReferenceImage) {
+      return NextResponse.json({ message: "请先选择蛋糕，或上传参考图片。" }, { status: 400 });
+    }
+
+    if ((payload.productCategory && !payload.productName) || (!payload.productCategory && payload.productName)) {
+      return NextResponse.json({ message: "蛋糕分类和款式需要同时填写。" }, { status: 400 });
     }
 
     if (!payload.email) {

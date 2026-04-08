@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 
 type TabKey = "showcase" | "order";
 type Language = "zh" | "en" | "es";
@@ -125,25 +125,18 @@ const copy = {
     showcaseTitle: "蛋糕展示",
     showcaseHint: "先选择分类，再点击具体款式查看订购细节。",
     showcaseCustomHint: "没有看到想要的款式？你可以上传参考图片，我们会按你的想法沟通定制。",
-    detail: "查看订购细节",
-    orderThis: "订购这款蛋糕",
-    selected: "已选择",
-    availableSize: "可选尺寸",
-    availableFilling: "可选夹馅",
-    deliverySupport: "配送：支持送货和自取",
     orderTitle: "在线下单",
     orderHint: "请填写具体需求，提交后我会通过邮箱收到订单内容。",
+    orderStep1: "1. 选择款式或上传参考图",
+    orderStep2: "2. 选择尺寸与夹馅",
+    orderStep3: "3. 填写联系方式与取货时间",
     needPick: "你还没有选择具体蛋糕。请先切换到“展示”Tab 选择款式，再回来提交订单。",
     currentCake: "当前订购款式",
     name: "姓名",
-    category: "分类",
-    cakeName: "蛋糕款式",
     size: "尺寸",
     otherSize: "其他尺寸",
     filling: "夹馅",
     otherFilling: "其他夹馅",
-    delivery: "是否需要送货",
-    address: "配送地址",
     email: "邮箱",
     phone: "手机号（可选）",
     pickupDate: "取货日期",
@@ -158,24 +151,17 @@ const copy = {
     otherSizeRequired: "你选择了其他尺寸，请填写具体尺寸。",
     otherFillingRequired: "你选择了其他夹馅，请填写具体口味。",
     pickupRequired: "请填写取货日期和时间。",
-    needAddress: "你选择了送货，请填写配送地址。",
     pickFirst: "请先在展示页选择具体蛋糕，再填写订购信息。",
-    success: "订单提交成功！我已经收到你的下单信息，会尽快联系你。",
     successDialogTitle: "下单成功",
     successDialogBody: "我们已收到你的订单，会尽快联系你。",
     closeDialog: "我知道了",
-    yes: "是",
-    no: "否",
     placeholderName: "例如：王小姐",
-    placeholderAddress: "请填写详细地址",
     placeholderEmail: "you@example.com",
     placeholderPhone: "13800000000",
     placeholderPickupTime: "例如：14:30",
     placeholderOtherSize: "例如：7寸 / 6+10 / 3层",
-    placeholderReferenceImageUrl: "也可以粘贴图片链接（可选）",
     placeholderNotes: "例如：希望周六上午送达，写生日祝福语等",
     placeholderOtherFilling: "例如：榴莲 / 红豆 / 奶酪",
-    selectFromShowcase: "请先在展示页选择",
   },
   en: {
     brand: "Lulu Bakery",
@@ -189,26 +175,18 @@ const copy = {
     showcaseTitle: "Cake Showcase",
     showcaseHint: "Choose a category first, then open a cake for ordering details.",
     showcaseCustomHint: "If you cannot find the style you want, upload a reference photo for custom discussion.",
-    detail: "View Order Details",
-    orderThis: "Order This Cake",
-    selected: "Selected",
-    availableSize: "Available Sizes",
-    availableFilling: "Available Fillings",
-    availableSugar: "Available Sweetness",
-    deliverySupport: "Delivery: shipping and pickup supported",
     orderTitle: "Place Order",
     orderHint: "Fill in your requirements. I will receive this order by email.",
+    orderStep1: "1. Pick style or upload reference",
+    orderStep2: "2. Choose size and filling",
+    orderStep3: "3. Leave contact and pickup details",
     needPick: "No cake selected yet. Please pick one in the Showcase tab first.",
     currentCake: "Current Cake",
     name: "Name",
-    category: "Category",
-    cakeName: "Cake Style",
     size: "Size",
     otherSize: "Other Size",
     filling: "Filling",
     otherFilling: "Other Filling",
-    delivery: "Need Delivery",
-    address: "Delivery Address",
     email: "Email",
     phone: "Phone (Optional)",
     pickupDate: "Pickup Date",
@@ -223,24 +201,17 @@ const copy = {
     otherSizeRequired: "Please enter your custom size.",
     otherFillingRequired: "Please enter your custom filling.",
     pickupRequired: "Please provide pickup date and time.",
-    needAddress: "You selected delivery. Please enter the address.",
     pickFirst: "Please select a cake from Showcase before ordering.",
-    success: "Order submitted successfully. I will contact you soon.",
     successDialogTitle: "Order Submitted",
     successDialogBody: "We received your order and will contact you soon.",
     closeDialog: "OK",
-    yes: "Yes",
-    no: "No",
     placeholderName: "e.g. Olivia",
-    placeholderAddress: "Please enter full address",
     placeholderEmail: "you@example.com",
     placeholderPhone: "+1 555 123 4567",
     placeholderPickupTime: "e.g. 2:30 PM",
     placeholderOtherSize: "e.g. 7 inch / 6+10 / 3 tiers",
-    placeholderReferenceImageUrl: "You can also paste an image URL (optional)",
     placeholderNotes: "e.g. Please deliver Saturday morning",
     placeholderOtherFilling: "e.g. Durian / Red Bean / Cream Cheese",
-    selectFromShowcase: "Please select in Showcase",
   },
   es: {
     brand: "Lulu Bakery",
@@ -254,26 +225,18 @@ const copy = {
     showcaseTitle: "Galeria de Pasteles",
     showcaseHint: "Primero elige una categoria y luego abre un pastel para ver detalles.",
     showcaseCustomHint: "Si no encuentras el estilo que quieres, sube una foto de referencia para personalizar.",
-    detail: "Ver Detalles de Pedido",
-    orderThis: "Pedir Este Pastel",
-    selected: "Seleccionado",
-    availableSize: "Tamanos Disponibles",
-    availableFilling: "Rellenos Disponibles",
-    availableSugar: "Nivel de Dulzor",
-    deliverySupport: "Entrega: envio y recogida disponibles",
     orderTitle: "Hacer Pedido",
     orderHint: "Completa tus requisitos. Recibire este pedido por correo.",
+    orderStep1: "1. Elige estilo o sube referencia",
+    orderStep2: "2. Elige tamano y relleno",
+    orderStep3: "3. Deja contacto y hora de recogida",
     needPick: "Aun no has elegido un pastel. Selecciona uno en la Galeria.",
     currentCake: "Pastel Actual",
     name: "Nombre",
-    category: "Categoria",
-    cakeName: "Estilo de Pastel",
     size: "Tamano",
     otherSize: "Otro tamano",
     filling: "Relleno",
     otherFilling: "Otro relleno",
-    delivery: "Necesita Entrega",
-    address: "Direccion de Entrega",
     email: "Correo",
     phone: "Telefono (Opcional)",
     pickupDate: "Fecha de recogida",
@@ -288,24 +251,17 @@ const copy = {
     otherSizeRequired: "Elegiste otro tamano. Completa el tamano personalizado.",
     otherFillingRequired: "Elegiste otro relleno. Completa el relleno personalizado.",
     pickupRequired: "Completa fecha y hora de recogida.",
-    needAddress: "Elegiste entrega. Ingresa la direccion.",
     pickFirst: "Selecciona primero un pastel en la Galeria.",
-    success: "Pedido enviado correctamente. Te contactare pronto.",
     successDialogTitle: "Pedido enviado",
     successDialogBody: "Recibimos tu pedido y te contactaremos pronto.",
     closeDialog: "Entendido",
-    yes: "Si",
-    no: "No",
     placeholderName: "ej. Sofia",
-    placeholderAddress: "Ingresa direccion completa",
     placeholderEmail: "you@example.com",
     placeholderPhone: "+34 600 000 000",
     placeholderPickupTime: "ej. 14:30",
     placeholderOtherSize: "ej. 7 pulgadas / 6+10 / 3 pisos",
-    placeholderReferenceImageUrl: "Tambien puedes pegar un enlace de imagen (opcional)",
     placeholderNotes: "ej. Entrega el sabado por la manana",
     placeholderOtherFilling: "ej. Durian / Frijol rojo / Queso crema",
-    selectFromShowcase: "Selecciona primero en Galeria",
   },
 } as const;
 
@@ -324,16 +280,11 @@ export default function HomeClient({ initialProducts }: Props) {
   const [uploadingReferenceImage, setUploadingReferenceImage] = useState(false);
   const [message, setMessage] = useState("");
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const t = copy[language];
   const filteredWorks = useMemo(
     () => (activeCategory === "all" ? products : products.filter((work) => work.category === activeCategory)),
     [activeCategory, products],
   );
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const goOrder = (cake: CakeItem) => {
     setSelectedCake(cake);
@@ -434,23 +385,23 @@ export default function HomeClient({ initialProducts }: Props) {
   };
 
   const inputClassName =
-    "mt-1 w-full rounded-lg border border-rose-200 px-3 py-2 outline-none transition focus:border-rose-400";
+    "mt-1 w-full rounded-lg border border-[#D8D2C9] px-3 py-2 outline-none transition focus:border-[#8B776A]";
 
   return (
-    <main className="min-h-screen bg-linear-to-b from-pink-50 via-rose-50 to-amber-50 py-10 text-zinc-800">
+    <main className="min-h-screen bg-linear-to-b from-[#F8F7F5] via-[#F6F5F2] to-[#F3F1ED] py-10 text-zinc-800">
       <div className="mx-auto max-w-6xl px-6">
-        <section className="rounded-2xl bg-linear-to-r from-rose-200 via-pink-200 to-amber-200 p-8 shadow-sm">
+        <section className="rounded-2xl bg-linear-to-r from-[#E7E3DE] via-[#E3DED8] to-[#DED8D0] p-8 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold text-rose-700">{t.brand}</p>
-              <p className="text-xs text-rose-800/80">{t.location}</p>
+              <p className="text-sm font-semibold text-[#4C403A]">{t.brand}</p>
+              <p className="text-xs text-[#6A5D56]">{t.location}</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <select
                 aria-label="Select language"
                 value={language}
                 onChange={(event) => setLanguage(event.target.value as Language)}
-                className="rounded-full border border-rose-300 bg-white px-4 py-1.5 text-sm font-semibold text-rose-700 outline-none transition focus:border-rose-500"
+                className="rounded-full border border-[#D8D2C9] bg-white px-4 py-1.5 text-sm font-semibold text-[#4C403A] outline-none transition focus:border-[#8B776A]"
               >
                 {(["en", "zh", "es"] as Language[]).map((lang) => (
                   <option key={lang} value={lang}>
@@ -460,7 +411,7 @@ export default function HomeClient({ initialProducts }: Props) {
               </select>
               <Link
                 href="/about"
-                className="rounded-full bg-zinc-900 px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-zinc-700"
+                className="rounded-full bg-[#5C4B43] px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-[#4D3F38]"
               >
                 {t.aboutLink}
               </Link>
@@ -468,7 +419,7 @@ export default function HomeClient({ initialProducts }: Props) {
           </div>
           <h1 className="mt-3 text-3xl font-bold sm:text-4xl">{t.title}</h1>
           <p className="mt-3 max-w-3xl text-zinc-700">{t.intro}</p>
-          <div className="mt-5 overflow-hidden rounded-xl border border-rose-200 bg-white/70">
+          <div className="mt-5 overflow-hidden rounded-xl border border-[#D8D2C9] bg-white/85">
             <div className="relative h-52 w-full sm:h-64">
               <Image src="/products/cupcake.jpg" alt="Assorted bakery cakes" fill className="object-cover" />
             </div>
@@ -479,7 +430,7 @@ export default function HomeClient({ initialProducts }: Props) {
           <button
             type="button"
             onClick={() => setActiveTab("showcase")}
-            className={`rounded-full px-5 py-2 text-sm font-semibold transition ${activeTab === "showcase" ? "bg-rose-500 text-white" : "bg-rose-100 text-rose-700 hover:bg-rose-200"
+            className={`rounded-full px-5 py-2 text-sm font-semibold transition ${activeTab === "showcase" ? "bg-[#5C4B43] text-white" : "bg-[#EFEAE4] text-[#5C4B43] hover:bg-[#E6DED4]"
               }`}
           >
             {t.tabShowcase}
@@ -487,7 +438,7 @@ export default function HomeClient({ initialProducts }: Props) {
           <button
             type="button"
             onClick={() => setActiveTab("order")}
-            className={`rounded-full px-5 py-2 text-sm font-semibold transition ${activeTab === "order" ? "bg-rose-500 text-white" : "bg-rose-100 text-rose-700 hover:bg-rose-200"
+            className={`rounded-full px-5 py-2 text-sm font-semibold transition ${activeTab === "order" ? "bg-[#5C4B43] text-white" : "bg-[#EFEAE4] text-[#5C4B43] hover:bg-[#E6DED4]"
               }`}
           >
             {t.tabOrder}
@@ -495,24 +446,22 @@ export default function HomeClient({ initialProducts }: Props) {
         </section>
 
         {activeTab === "showcase" && (
-          <section className="mt-8 rounded-2xl border border-rose-200 bg-white/95 p-6 sm:p-8">
+          <section className="mt-8 rounded-2xl border border-[#D8D2C9] bg-white/95 p-6 sm:p-8">
             <h2 className="text-2xl font-semibold">{t.showcaseTitle}</h2>
             <p className="mt-2 text-sm text-zinc-600">{t.showcaseHint}</p>
 
             <div className="mt-5 flex flex-wrap gap-2">
-              {mounted
-                ? categories.map((category) => (
-                  <button
-                    key={category}
-                    type="button"
-                    onClick={() => setActiveCategory(category)}
-                    className={`rounded-full px-4 py-2 text-sm font-semibold transition ${category === activeCategory ? "bg-rose-500 text-white" : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
-                      }`}
-                  >
-                    {categoryLabels[language][category]}
-                  </button>
-                ))
-                : null}
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  type="button"
+                  onClick={() => setActiveCategory(category)}
+                  className={`rounded-full px-4 py-2 text-sm font-semibold transition ${category === activeCategory ? "bg-[#5C4B43] text-white" : "bg-[#F1ECE7] text-[#5C4B43] hover:bg-[#E6DED4]"
+                    }`}
+                >
+                  {categoryLabels[language][category]}
+                </button>
+              ))}
             </div>
 
             <div className="mt-5 grid gap-4 md:grid-cols-3">
@@ -520,7 +469,7 @@ export default function HomeClient({ initialProducts }: Props) {
                 <button
                   key={work.id}
                   type="button"
-                  className="rounded-xl border border-rose-100 bg-white p-5 text-left shadow-sm transition hover:border-rose-300 hover:shadow-md"
+                  className="rounded-xl border border-[#DDD6CE] bg-white p-5 text-left shadow-sm transition hover:border-[#CDBFAF] hover:shadow-md"
                   onClick={() => goOrder(work)}
                 >
                   {work.imageUrl ? (
@@ -529,12 +478,12 @@ export default function HomeClient({ initialProducts }: Props) {
                         src={work.imageUrl}
                         alt={work.titleI18n[language]}
                         fill
-                        className="object-cover"
+                        className="object-cover brightness-95 contrast-105"
                         sizes="(min-width: 768px) 33vw, 100vw"
                       />
                     </div>
                   ) : (
-                    <div className="aspect-square rounded-lg bg-linear-to-br from-rose-100 to-orange-100" />
+                    <div className="aspect-square rounded-lg bg-linear-to-br from-[#EEEAE4] to-[#E8E2D9]" />
                   )}
                   <h3 className="mt-3 text-lg font-semibold">{work.titleI18n[language]}</h3>
                 </button>
@@ -542,7 +491,7 @@ export default function HomeClient({ initialProducts }: Props) {
             </div>
             <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4">
               <p className="text-sm text-amber-800">{t.showcaseCustomHint}</p>
-              <label className="mt-3 inline-flex cursor-pointer rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-zinc-700">
+              <label className="mt-3 inline-flex cursor-pointer rounded-lg bg-[#5C4B43] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#4D3F38]">
                 {uploadingReferenceImage ? t.uploadingReferenceImage : t.uploadReferenceImage}
                 <input
                   type="file"
@@ -564,41 +513,108 @@ export default function HomeClient({ initialProducts }: Props) {
         )}
 
         {activeTab === "order" && (
-          <section className="mt-8 rounded-2xl border border-rose-200 bg-white/95 p-6 sm:p-8">
+          <section className="mt-8 rounded-2xl border border-[#D8D2C9] bg-white/95 p-6 sm:p-8">
             <h2 className="text-2xl font-semibold">{t.orderTitle}</h2>
             <p className="mt-2 text-sm text-zinc-600">{t.orderHint}</p>
-            {!selectedCake && !form.referenceImageUrl.trim() && (
-              <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700">
-                {t.needPick}
+            <div className="mt-4 grid gap-2 sm:grid-cols-3">
+              <div className="rounded-lg border border-[#D8D2C9] bg-[#F1ECE7] px-3 py-2 text-xs font-semibold text-[#5C4B43]">
+                {t.orderStep1}
               </div>
-            )}
-            {selectedCake && (
-              <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm text-zinc-700">
-                {t.currentCake}：<span className="font-semibold">{selectedCake.titleI18n[language]}</span>
-                {selectedCake.imageUrl ? (
-                  <div className="relative mt-3 aspect-square w-full max-w-sm overflow-hidden rounded-lg border border-rose-200 bg-white">
-                    <Image
-                      src={selectedCake.imageUrl}
-                      alt={selectedCake.titleI18n[language]}
-                      fill
-                      className="object-cover"
-                      sizes="(min-width: 640px) 24rem, 100vw"
-                    />
+              <div className="rounded-lg border border-[#D8D2C9] bg-[#F1ECE7] px-3 py-2 text-xs font-semibold text-[#5C4B43]">
+                {t.orderStep2}
+              </div>
+              <div className="rounded-lg border border-[#D8D2C9] bg-[#F1ECE7] px-3 py-2 text-xs font-semibold text-[#5C4B43]">
+                {t.orderStep3}
+              </div>
+            </div>
+            <div className="mt-4 text-sm font-semibold text-zinc-700">{t.orderStep1}</div>
+            {selectedCake ? (
+              <div className="mt-2 grid gap-4 lg:grid-cols-2">
+                <div className="rounded-lg border border-[#D8D2C9] bg-[#F4F1EC] p-4 text-sm text-zinc-700">
+                  {t.currentCake}：<span className="font-semibold">{selectedCake.titleI18n[language]}</span>
+                  {selectedCake.imageUrl ? (
+                    <div className="relative mt-3 aspect-square w-full max-w-sm overflow-hidden rounded-lg border border-rose-200 bg-white">
+                      <Image
+                        src={selectedCake.imageUrl}
+                        alt={selectedCake.titleI18n[language]}
+                        fill
+                        className="object-cover brightness-95 contrast-105"
+                        sizes="(min-width: 640px) 24rem, 100vw"
+                      />
+                    </div>
+                  ) : null}
+                </div>
+                <div className="rounded-lg border border-[#D8D2C9] bg-[#F4F1EC] p-4">
+                  <p>{t.referenceImage}</p>
+                  <div className="mt-1 flex flex-wrap items-center gap-2">
+                    <label className="inline-flex cursor-pointer rounded-lg border border-[#D8D2C9] bg-white px-3 py-2 text-sm font-semibold text-[#5C4B43] transition hover:bg-[#F4F1EC]">
+                      {uploadingReferenceImage ? t.uploadingReferenceImage : t.uploadReferenceImage}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        disabled={uploadingReferenceImage}
+                        onChange={(event) => {
+                          const file = event.target.files?.[0];
+                          if (file) {
+                            void onReferenceImageSelected(file);
+                          }
+                          event.currentTarget.value = "";
+                        }}
+                      />
+                    </label>
+                    {form.referenceImageUrl ? (
+                      <span className="text-xs text-green-700">Uploaded</span>
+                    ) : null}
                   </div>
-                ) : null}
+                  {form.referenceImageUrl ? (
+                    <div className="relative mt-2 aspect-square w-full max-w-sm overflow-hidden rounded-lg border border-rose-200 bg-white">
+                      <Image src={form.referenceImageUrl} alt="Reference image" fill className="object-cover" sizes="18rem" />
+                    </div>
+                  ) : null}
+                </div>
               </div>
+            ) : (
+              <>
+                {!form.referenceImageUrl.trim() && (
+                  <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700">
+                    {t.needPick}
+                  </div>
+                )}
+                <div className="mt-2 rounded-lg border border-[#D8D2C9] bg-[#F4F1EC] p-4">
+                  <p>{t.referenceImage}</p>
+                  <div className="mt-1 flex flex-wrap items-center gap-2">
+                    <label className="inline-flex cursor-pointer rounded-lg border border-[#D8D2C9] bg-white px-3 py-2 text-sm font-semibold text-[#5C4B43] transition hover:bg-[#F4F1EC]">
+                      {uploadingReferenceImage ? t.uploadingReferenceImage : t.uploadReferenceImage}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        disabled={uploadingReferenceImage}
+                        onChange={(event) => {
+                          const file = event.target.files?.[0];
+                          if (file) {
+                            void onReferenceImageSelected(file);
+                          }
+                          event.currentTarget.value = "";
+                        }}
+                      />
+                    </label>
+                    {form.referenceImageUrl ? (
+                      <span className="text-xs text-green-700">Uploaded</span>
+                    ) : null}
+                  </div>
+                  {form.referenceImageUrl ? (
+                    <div className="relative mt-2 aspect-square w-full max-w-sm overflow-hidden rounded-lg border border-rose-200 bg-white">
+                      <Image src={form.referenceImageUrl} alt="Reference image" fill className="object-cover" sizes="18rem" />
+                    </div>
+                  ) : null}
+                </div>
+              </>
             )}
             <form className="mt-6 grid gap-4 sm:grid-cols-2" onSubmit={onSubmit}>
-              <label>
-                {t.name}
-                <input
-                  className={inputClassName}
-                  value={form.name}
-                  onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-                  placeholder={t.placeholderName}
-                  required
-                />
-              </label>
+
+              <div className="sm:col-span-2 mt-1 text-sm font-semibold text-zinc-700">{t.orderStep2}</div>
               <label>
                 {t.size}
                 <select
@@ -657,6 +673,18 @@ export default function HomeClient({ initialProducts }: Props) {
                   />
                 </label>
               )}
+
+              <div className="sm:col-span-2 mt-1 text-sm font-semibold text-zinc-700">{t.orderStep3}</div>
+              <label>
+                {t.name}
+                <input
+                  className={inputClassName}
+                  value={form.name}
+                  onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+                  placeholder={t.placeholderName}
+                  required
+                />
+              </label>
               <label>
                 {t.email}
                 <input
@@ -698,35 +726,6 @@ export default function HomeClient({ initialProducts }: Props) {
                   required
                 />
               </label>
-              <div className="sm:col-span-2">
-                <p>{t.referenceImage}</p>
-                <div className="mt-1 flex flex-wrap items-center gap-2">
-                  <label className="inline-flex cursor-pointer rounded-lg border border-rose-200 bg-white px-3 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-50">
-                    {uploadingReferenceImage ? t.uploadingReferenceImage : t.uploadReferenceImage}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      disabled={uploadingReferenceImage}
-                      onChange={(event) => {
-                        const file = event.target.files?.[0];
-                        if (file) {
-                          void onReferenceImageSelected(file);
-                        }
-                        event.currentTarget.value = "";
-                      }}
-                    />
-                  </label>
-                  {form.referenceImageUrl ? (
-                    <span className="text-xs text-green-700">Uploaded</span>
-                  ) : null}
-                </div>
-                {form.referenceImageUrl ? (
-                  <div className="relative mt-2 aspect-square w-full max-w-sm overflow-hidden rounded-lg border border-rose-200 bg-white">
-                    <Image src={form.referenceImageUrl} alt="Reference image" fill className="object-cover" sizes="18rem" />
-                  </div>
-                ) : null}
-              </div>
               <label className="sm:col-span-2">
                 {t.notes}
                 <textarea
@@ -741,7 +740,7 @@ export default function HomeClient({ initialProducts }: Props) {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="rounded-lg bg-rose-500 px-5 py-2 font-semibold text-white transition hover:bg-rose-600 disabled:cursor-not-allowed disabled:bg-rose-300"
+                  className="rounded-lg bg-[#5C4B43] px-5 py-2 font-semibold text-white transition hover:bg-[#4D3F38] disabled:cursor-not-allowed disabled:bg-[#B8ADA3]"
                 >
                   {submitting ? t.submitting : t.submit}
                 </button>
@@ -757,14 +756,14 @@ export default function HomeClient({ initialProducts }: Props) {
           onClick={() => setShowSuccessDialog(false)}
         >
           <div
-            className="w-full max-w-md rounded-2xl border border-rose-200 bg-white p-6 shadow-xl"
+            className="w-full max-w-md rounded-2xl border border-[#D8D2C9] bg-white p-6 shadow-xl"
             onClick={(event) => event.stopPropagation()}
           >
             <h3 className="text-lg font-semibold text-zinc-900">{t.successDialogTitle}</h3>
             <p className="mt-3 text-sm text-zinc-700">{t.successDialogBody}</p>
             <button
               type="button"
-              className="mt-5 rounded-lg bg-rose-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-600"
+              className="mt-5 rounded-lg bg-[#5C4B43] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#4D3F38]"
               onClick={() => setShowSuccessDialog(false)}
             >
               {t.closeDialog}

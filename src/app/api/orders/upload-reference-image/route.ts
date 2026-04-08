@@ -5,6 +5,44 @@ import { getSupabaseAdminClient } from "@/lib/supabase";
 export const runtime = "nodejs";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX_REQUESTS = 8;
+const ipRequestStore = new Map<string, number[]>();
+
+function getClientIp(request: NextRequest) {
+  const forwarded = request.headers.get("x-forwarded-for");
+  if (forwarded) {
+    return forwarded.split(",")[0]?.trim() || "unknown";
+  }
+  return request.headers.get("x-real-ip") || "unknown";
+}
+
+function isRateLimited(ip: string) {
+  const now = Date.now();
+  const windowStart = now - RATE_LIMIT_WINDOW_MS;
+  const existing = ipRequestStore.get(ip) || [];
+  const recent = existing.filter((time) => time > windowStart);
+  recent.push(now);
+  ipRequestStore.set(ip, recent);
+
+  if (recent.length > RATE_LIMIT_MAX_REQUESTS) {
+    return true;
+  }
+
+  // Best-effort cleanup to avoid unbounded growth.
+  if (ipRequestStore.size > 5000) {
+    for (const [key, timestamps] of ipRequestStore.entries()) {
+      const valid = timestamps.filter((time) => time > windowStart);
+      if (valid.length === 0) {
+        ipRequestStore.delete(key);
+      } else {
+        ipRequestStore.set(key, valid);
+      }
+    }
+  }
+
+  return false;
+}
 
 function getSafeExtension(fileName: string, fileType: string) {
   const extFromName = fileName.includes(".") ? `.${fileName.split(".").pop()?.toLowerCase()}` : "";
@@ -20,6 +58,11 @@ function getSafeExtension(fileName: string, fileType: string) {
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = getClientIp(request);
+    if (isRateLimited(ip)) {
+      return NextResponse.json({ message: "上传太频繁，请稍后再试。" }, { status: 429 });
+    }
+
     const formData = await request.formData();
     const file = formData.get("image");
 

@@ -1,7 +1,7 @@
-import HomeClientShell from "@/components/home-client-shell";
+import HomeClient from "@/components/home-client";
 import { readProducts } from "@/lib/products";
 
 export default async function Home() {
   const result = await readProducts();
-  return <HomeClientShell initialProducts={result.products} />;
+  return <HomeClient initialProducts={result.products} />;
 }

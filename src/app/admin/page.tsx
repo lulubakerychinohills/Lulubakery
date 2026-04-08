@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 
@@ -145,18 +146,18 @@ export default function AdminPage() {
     }
   };
 
-  const inputClass = "mt-1 w-full rounded-lg border border-rose-200 px-3 py-2 outline-none focus:border-rose-400";
+  const inputClass = "mt-1 w-full rounded-lg border border-[#D8D2C9] px-3 py-2 outline-none focus:border-[#8B776A]";
   const previewUrl = form.imageUrl.trim();
   const canPreview = previewUrl.startsWith("/") || previewUrl.startsWith("http://") || previewUrl.startsWith("https://");
 
   if (checking) {
-    return <main className="min-h-screen bg-rose-50 p-8">正在检查登录状态...</main>;
+    return <main className="min-h-screen bg-[#F6F5F2] p-8">正在检查登录状态...</main>;
   }
 
   if (!authenticated) {
     return (
-      <main className="min-h-screen bg-rose-50 p-6 text-zinc-800 sm:p-10">
-        <section className="mx-auto max-w-lg rounded-2xl border border-rose-200 bg-white p-6 shadow-sm">
+      <main className="min-h-screen bg-[#F6F5F2] p-6 text-zinc-800 sm:p-10">
+        <section className="mx-auto max-w-lg rounded-2xl border border-[#D8D2C9] bg-white p-6 shadow-sm">
           <h1 className="text-2xl font-semibold">产品管理登录</h1>
           <p className="mt-2 text-sm text-zinc-600">请输入管理密码后上传新产品。</p>
           <form className="mt-5" onSubmit={onLogin}>
@@ -172,7 +173,7 @@ export default function AdminPage() {
             </label>
             <button
               type="submit"
-              className="mt-4 rounded-lg bg-rose-500 px-5 py-2 font-semibold text-white transition hover:bg-rose-600"
+              className="mt-4 rounded-lg bg-[#5C4B43] px-5 py-2 font-semibold text-white transition hover:bg-[#4D3F38]"
             >
               登录
             </button>
@@ -184,15 +185,15 @@ export default function AdminPage() {
   }
 
   return (
-    <main className="min-h-screen bg-linear-to-b from-pink-50 via-rose-50 to-amber-50 p-6 text-zinc-800 sm:p-10">
+    <main className="min-h-screen bg-linear-to-b from-[#F8F7F5] via-[#F6F5F2] to-[#F3F1ED] p-6 text-zinc-800 sm:p-10">
       <div className="mx-auto max-w-5xl">
-        <section className="rounded-2xl border border-rose-200 bg-white p-6 shadow-sm">
+        <section className="rounded-2xl border border-[#D8D2C9] bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between gap-3">
             <h1 className="text-2xl font-semibold">产品上传后台</h1>
             <button
               type="button"
               onClick={onLogout}
-              className="rounded-lg border border-rose-300 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-50"
+              className="rounded-lg border border-[#D8D2C9] px-4 py-2 text-sm font-semibold text-[#5C4B43] transition hover:bg-[#F4F1EC]"
             >
               退出登录
             </button>
@@ -237,22 +238,22 @@ export default function AdminPage() {
               />
             </label>
 
-            <div className="sm:col-span-2 rounded-lg border border-rose-100 bg-white p-4">
+            <div className="sm:col-span-2 rounded-lg border border-[#DDD6CE] bg-white p-4">
               <p className="text-sm font-semibold text-zinc-700">或从本地选择图片</p>
               <p className="mt-1 text-xs text-zinc-500">支持 jpg / png / webp / gif，大小不超过 5MB。</p>
-              <label className="mt-3 inline-flex cursor-pointer items-center rounded-lg border border-rose-300 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-50">
+              <label className="mt-3 inline-flex cursor-pointer items-center rounded-lg border border-[#D8D2C9] px-4 py-2 text-sm font-semibold text-[#5C4B43] transition hover:bg-[#F4F1EC]">
                 <input type="file" accept="image/*" className="hidden" onChange={onPickImage} />
                 {uploadingImage ? "上传图片中..." : "选择本地图片"}
               </label>
             </div>
 
             {previewUrl ? (
-              <div className="sm:col-span-2 rounded-lg border border-rose-100 bg-rose-50 p-4">
+              <div className="sm:col-span-2 rounded-lg border border-[#DDD6CE] bg-[#F4F1EC] p-4">
                 <p className="text-sm font-semibold text-zinc-700">图片预览</p>
                 <p className="mt-1 text-xs text-zinc-500">{previewUrl}</p>
                 {canPreview ? (
-                  <div className="mt-3 h-40 w-full max-w-xs overflow-hidden rounded-lg border border-rose-200 bg-white">
-                    <img src={previewUrl} alt="产品预览图" className="h-full w-full object-cover" />
+                  <div className="relative mt-3 h-40 w-full max-w-xs overflow-hidden rounded-lg border border-[#D8D2C9] bg-white">
+                    <Image src={previewUrl} alt="产品预览图" fill className="object-cover" sizes="20rem" />
                   </div>
                 ) : (
                   <p className="mt-2 text-xs text-amber-700">
@@ -276,7 +277,7 @@ export default function AdminPage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded-lg bg-rose-500 px-5 py-2 font-semibold text-white transition hover:bg-rose-600 disabled:cursor-not-allowed disabled:bg-rose-300"
+                className="rounded-lg bg-[#5C4B43] px-5 py-2 font-semibold text-white transition hover:bg-[#4D3F38] disabled:cursor-not-allowed disabled:bg-[#B8ADA3]"
               >
                 {saving ? "上传中..." : "上传产品"}
               </button>
@@ -286,14 +287,14 @@ export default function AdminPage() {
           {message && <p className="mt-3 text-sm text-zinc-700">{message}</p>}
         </section>
 
-        <section className="mt-6 rounded-2xl border border-rose-200 bg-white p-6 shadow-sm">
+        <section className="mt-6 rounded-2xl border border-[#D8D2C9] bg-white p-6 shadow-sm">
           <h2 className="text-xl font-semibold">当前产品列表</h2>
           <ul className="mt-4 space-y-2 text-sm text-zinc-700">
             {products.map((item) => (
               <li key={item.id} className="flex items-center gap-3 rounded-lg border border-zinc-200 px-3 py-2">
                 {item.imageUrl ? (
-                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md border border-rose-100 bg-rose-50">
-                    <img src={item.imageUrl} alt={item.titleI18n.zh} className="h-full w-full object-cover" />
+                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md border border-[#DDD6CE] bg-[#F4F1EC]">
+                    <Image src={item.imageUrl} alt={item.titleI18n.zh} fill className="object-cover" sizes="3rem" />
                   </div>
                 ) : (
                   <div className="h-12 w-12 shrink-0 rounded-md border border-zinc-200 bg-zinc-50" />

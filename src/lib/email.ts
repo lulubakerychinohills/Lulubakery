@@ -63,6 +63,11 @@ function escapeHtml(input: string) {
 
 export async function sendOrderEmail(order: OrderPayload) {
   const { host, port, user, pass, from, notificationEmail } = getEmailConfig();
+  const categoryText = order.productCategory
+    ? categoryMap[order.productCategory] || order.productCategory
+    : "未选择（参考图定制）";
+  const productNameText = order.productName || "未选择（参考图定制）";
+  const subjectProduct = order.productName || "参考图定制";
 
   const transporter = nodemailer.createTransport({
     host,
@@ -81,8 +86,8 @@ export async function sendOrderEmail(order: OrderPayload) {
 姓名：${order.name}
 取货日期：${order.pickupDate}
 取货时间：${order.pickupTime}
-分类：${categoryMap[order.productCategory] || order.productCategory}
-蛋糕款式：${order.productName}
+分类：${categoryText}
+蛋糕款式：${productNameText}
 尺寸：${sizeMap[order.size] || order.size}
 夹馅：${fillingMap[order.filling] || order.filling}
 联系方式：${contact || "未提供"}
@@ -100,8 +105,8 @@ export async function sendOrderEmail(order: OrderPayload) {
       <p><strong>姓名：</strong>${escapeHtml(order.name)}</p>
       <p><strong>取货日期：</strong>${escapeHtml(order.pickupDate)}</p>
       <p><strong>取货时间：</strong>${escapeHtml(order.pickupTime)}</p>
-      <p><strong>分类：</strong>${escapeHtml(categoryMap[order.productCategory] || order.productCategory)}</p>
-      <p><strong>蛋糕款式：</strong>${escapeHtml(order.productName)}</p>
+      <p><strong>分类：</strong>${escapeHtml(categoryText)}</p>
+      <p><strong>蛋糕款式：</strong>${escapeHtml(productNameText)}</p>
       <p><strong>尺寸：</strong>${escapeHtml(sizeMap[order.size] || order.size)}</p>
       <p><strong>夹馅：</strong>${escapeHtml(fillingMap[order.filling] || order.filling)}</p>
       <p><strong>联系方式：</strong>${escapeHtml(contact || "未提供")}</p>
@@ -130,7 +135,7 @@ export async function sendOrderEmail(order: OrderPayload) {
   await transporter.sendMail({
     from,
     to: notificationEmail,
-    subject: `新订单 - ${order.name} (${order.productName})`,
+    subject: `新订单 - ${order.name} (${subjectProduct})`,
     text,
     html,
   });
