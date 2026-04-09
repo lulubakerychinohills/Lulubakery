@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 
 type Language = "zh" | "en" | "es";
@@ -98,9 +99,14 @@ export default function PrivacyPage() {
       <div className="mx-auto max-w-4xl px-6">
         <section className="rounded-2xl bg-linear-to-r from-[#E7E3DE] via-[#E3DED8] to-[#DED8D0] p-8 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-sm font-semibold text-[#4C403A]">Lulu Bakery</p>
-              <p className="text-xs text-[#6A5D56]">Chino Hills</p>
+            <div className="flex items-center gap-3">
+              <div className="relative h-12 w-12 overflow-hidden rounded-full border border-[#D8D2C9] bg-white/90">
+                <Image src="/brand/avatar.png" alt="Lulu Bakery avatar" fill className="object-cover" sizes="48px" priority />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-[#4C403A]">Lulu Bakery</p>
+                <p className="text-xs text-[#6A5D56]">Chino Hills</p>
+              </div>
             </div>
             <select
               aria-label="Select language"

@@ -408,9 +408,14 @@ export default function HomeClient({ initialProducts }: Props) {
       <div className="mx-auto max-w-6xl px-6">
         <section className="rounded-2xl bg-linear-to-r from-[#E7E3DE] via-[#E3DED8] to-[#DED8D0] p-8 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-sm font-semibold text-[#4C403A]">{t.brand}</p>
-              <p className="text-xs text-[#6A5D56]">{t.location}</p>
+            <div className="flex items-center gap-3">
+              <div className="relative h-12 w-12 overflow-hidden rounded-full border border-[#D8D2C9] bg-white/90">
+                <Image src="/brand/avatar.png" alt="Lulu Bakery avatar" fill className="object-cover" sizes="48px" priority />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-[#4C403A]">{t.brand}</p>
+                <p className="text-xs text-[#6A5D56]">{t.location}</p>
+              </div>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <select
