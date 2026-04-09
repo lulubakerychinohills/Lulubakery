@@ -7,6 +7,10 @@ function toStr(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function toBool(value: unknown) {
+  return value === true;
+}
+
 function toAbsoluteUrl(rawUrl: string, request: Request) {
   if (!rawUrl) return "";
   if (/^https?:\/\//i.test(rawUrl)) return rawUrl;
@@ -36,6 +40,7 @@ export async function POST(request: Request) {
       size: toStr(body.size),
       filling: toStr(body.filling),
       notes: toStr(body.notes),
+      acceptedPolicy: toBool(body.acceptedPolicy),
     };
 
     if (!payload.name) {
@@ -63,6 +68,10 @@ export async function POST(request: Request) {
 
     if (!payload.pickupDate || !payload.pickupTime) {
       return NextResponse.json({ message: "请提供取货日期和时间。" }, { status: 400 });
+    }
+
+    if (!payload.acceptedPolicy) {
+      return NextResponse.json({ message: "请先同意隐私政策。" }, { status: 400 });
     }
 
     await sendOrderEmail(payload);

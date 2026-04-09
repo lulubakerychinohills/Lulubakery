@@ -28,6 +28,7 @@ type OrderForm = {
   filling: FillingOption;
   customFilling: string;
   notes: string;
+  acceptedPolicy: boolean;
 };
 
 const initialForm: OrderForm = {
@@ -45,6 +46,7 @@ const initialForm: OrderForm = {
   filling: "strawberry",
   customFilling: "",
   notes: "",
+  acceptedPolicy: false,
 };
 
 export type CakeItem = {
@@ -122,6 +124,7 @@ const copy = {
     tabShowcase: "展示",
     tabOrder: "订购",
     aboutLink: "关于我们",
+    privacyLink: "隐私政策",
     showcaseTitle: "蛋糕展示",
     showcaseHint: "先选择分类，再点击具体款式查看订购细节。",
     showcaseCustomHint: "没有看到想要的款式？你可以上传参考图片，我们会按你的想法沟通定制。",
@@ -155,6 +158,8 @@ const copy = {
     successDialogTitle: "下单成功",
     successDialogBody: "我们已收到你的订单，会尽快联系你。",
     closeDialog: "我知道了",
+    policyConsent: "提交订单即表示你同意我们的《隐私政策》。",
+    policyRequired: "请先勾选同意隐私政策。",
     placeholderName: "例如：王小姐",
     placeholderEmail: "you@example.com",
     placeholderPhone: "13800000000",
@@ -172,6 +177,7 @@ const copy = {
     tabShowcase: "Showcase",
     tabOrder: "Order",
     aboutLink: "About Us",
+    privacyLink: "Privacy Policy",
     showcaseTitle: "Cake Showcase",
     showcaseHint: "Choose a category first, then open a cake for ordering details.",
     showcaseCustomHint: "If you cannot find the style you want, upload a reference photo for custom discussion.",
@@ -205,6 +211,8 @@ const copy = {
     successDialogTitle: "Order Submitted",
     successDialogBody: "We received your order and will contact you soon.",
     closeDialog: "OK",
+    policyConsent: "By submitting, you agree to our Privacy Policy.",
+    policyRequired: "Please agree to the Privacy Policy before submitting.",
     placeholderName: "e.g. Olivia",
     placeholderEmail: "you@example.com",
     placeholderPhone: "+1 555 123 4567",
@@ -222,6 +230,7 @@ const copy = {
     tabShowcase: "Galeria",
     tabOrder: "Pedido",
     aboutLink: "Sobre Nosotros",
+    privacyLink: "Politica de Privacidad",
     showcaseTitle: "Galeria de Pasteles",
     showcaseHint: "Primero elige una categoria y luego abre un pastel para ver detalles.",
     showcaseCustomHint: "Si no encuentras el estilo que quieres, sube una foto de referencia para personalizar.",
@@ -255,6 +264,8 @@ const copy = {
     successDialogTitle: "Pedido enviado",
     successDialogBody: "Recibimos tu pedido y te contactaremos pronto.",
     closeDialog: "Entendido",
+    policyConsent: "Al enviar, aceptas nuestra Politica de Privacidad.",
+    policyRequired: "Debes aceptar la Politica de Privacidad antes de enviar.",
     placeholderName: "ej. Sofia",
     placeholderEmail: "you@example.com",
     placeholderPhone: "+34 600 000 000",
@@ -351,6 +362,11 @@ export default function HomeClient({ initialProducts }: Props) {
       return;
     }
 
+    if (!form.acceptedPolicy) {
+      setMessage(t.policyRequired);
+      return;
+    }
+
     setSubmitting(true);
     try {
       const submitPayload = {
@@ -414,6 +430,12 @@ export default function HomeClient({ initialProducts }: Props) {
                 className="rounded-full bg-[#5C4B43] px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-[#4D3F38]"
               >
                 {t.aboutLink}
+              </Link>
+              <Link
+                href="/privacy"
+                className="rounded-full border border-[#D8D2C9] bg-white px-4 py-1.5 text-sm font-semibold text-[#5C4B43] transition hover:bg-[#F4F1EC]"
+              >
+                {t.privacyLink}
               </Link>
             </div>
           </div>
@@ -736,6 +758,21 @@ export default function HomeClient({ initialProducts }: Props) {
                   rows={4}
                 />
               </label>
+              <label className="sm:col-span-2 flex items-start gap-2 text-sm text-zinc-700">
+                <input
+                  type="checkbox"
+                  className="mt-0.5 h-4 w-4 rounded border-[#D8D2C9] text-[#5C4B43] focus:ring-[#8B776A]"
+                  checked={form.acceptedPolicy}
+                  onChange={(e) => setForm((prev) => ({ ...prev, acceptedPolicy: e.target.checked }))}
+                  required
+                />
+                <span>
+                  {t.policyConsent}{" "}
+                  <Link href="/privacy" className="font-semibold text-[#5C4B43] underline">
+                    {t.privacyLink}
+                  </Link>
+                </span>
+              </label>
               <div className="sm:col-span-2">
                 <button
                   type="submit"
@@ -749,6 +786,11 @@ export default function HomeClient({ initialProducts }: Props) {
             </form>
           </section>
         )}
+      </div>
+      <div className="mx-auto mt-8 max-w-6xl px-6 text-center text-xs text-zinc-600">
+        <Link href="/privacy" className="underline decoration-[#8B776A] underline-offset-2">
+          {t.privacyLink}
+        </Link>
       </div>
       {showSuccessDialog && (
         <div

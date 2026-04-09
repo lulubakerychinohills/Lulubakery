@@ -34,6 +34,7 @@ const copy = {
     contactLabel: "邮箱",
     contactBody: "lulubakerychinohills@gmail.com",
     cta: "返回首页下单",
+    privacyCta: "查看隐私政策",
   },
   en: {
     title: "About Lulu Bakery",
@@ -57,6 +58,7 @@ const copy = {
     contactLabel: "Email",
     contactBody: "lulubakerychinohills@gmail.com",
     cta: "Back to Home & Order",
+    privacyCta: "View Privacy Policy",
   },
   es: {
     title: "Sobre Lulu Bakery",
@@ -80,6 +82,7 @@ const copy = {
     contactLabel: "Correo",
     contactBody: "lulubakerychinohills@gmail.com",
     cta: "Volver al Inicio",
+    privacyCta: "Ver Politica de Privacidad",
   },
 } as const;
 
@@ -146,12 +149,18 @@ export default function AboutPage() {
           </article>
         </section>
 
-        <div className="mt-8">
+        <div className="mt-8 flex flex-wrap gap-3">
           <Link
             href="/"
             className="inline-flex rounded-full bg-[#5C4B43] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#4D3F38]"
           >
             {t.cta}
+          </Link>
+          <Link
+            href="/privacy"
+            className="inline-flex rounded-full border border-[#D8D2C9] bg-white px-5 py-2 text-sm font-semibold text-[#5C4B43] transition hover:bg-[#F4F1EC]"
+          >
+            {t.privacyCta}
           </Link>
         </div>
       </div>
