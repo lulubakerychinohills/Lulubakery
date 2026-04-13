@@ -35,7 +35,7 @@ export async function POST(request: Request) {
       pickupTime: toStr(body.pickupTime),
       referenceImageUrl: toAbsoluteUrl(toStr(body.referenceImageUrl), request),
       productCategory: toStr(body.productCategory),
-      productName: toStr(body.productName),
+      productId: toStr(body.productId),
       productImageUrl: toAbsoluteUrl(toStr(body.productImageUrl), request),
       size: toStr(body.size),
       filling: toStr(body.filling),
@@ -47,15 +47,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "请填写姓名。" }, { status: 400 });
     }
 
-    const hasProductSelection = Boolean(payload.productCategory && payload.productName);
+    const hasProductSelection = Boolean(payload.productId);
     const hasReferenceImage = Boolean(payload.referenceImageUrl);
 
     if (!hasProductSelection && !hasReferenceImage) {
       return NextResponse.json({ message: "请先选择蛋糕，或上传参考图片。" }, { status: 400 });
     }
 
-    if ((payload.productCategory && !payload.productName) || (!payload.productCategory && payload.productName)) {
-      return NextResponse.json({ message: "蛋糕分类和款式需要同时填写。" }, { status: 400 });
+    if (payload.productId && !payload.productCategory) {
+      return NextResponse.json({ message: "蛋糕分类不能为空。" }, { status: 400 });
     }
 
     if (!payload.email) {

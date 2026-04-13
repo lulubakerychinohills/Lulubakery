@@ -7,17 +7,14 @@ export type I18nText = Record<Language, string>;
 
 export type CakeItem = {
   id: string;
-  title: string;
   category: CakeCategory;
   imageUrl: string;
-  titleI18n: I18nText;
   descriptionI18n: I18nText;
 };
 
 export type NewCakeInput = {
   category: CakeCategory;
   imageUrl: string;
-  title: string;
   description: string;
 };
 
@@ -32,7 +29,6 @@ type ProductRow = {
   id: string;
   category: CakeCategory;
   image_url: string | null;  
-  title: string;
   description: string;
   created_at?: string;
 };
@@ -41,13 +37,7 @@ function mapRowToCakeItem(row: ProductRow): CakeItem {
   return {
     id: row.id,
     category: row.category,
-    title: row.title,
     imageUrl: row.image_url ?? "",
-    titleI18n: {
-      zh: row.title,
-      en: row.title,
-      es: row.title,
-    },
     descriptionI18n: {
       zh: row.description,
       en: row.description,
@@ -60,7 +50,7 @@ export async function readProducts(): Promise<ProductReadResult> {
   const supabase = getSupabaseClient();
   const { data, error } = await supabase
     .from("products")
-    .select("id, category, image_url, title, description, created_at")
+    .select("id, category, image_url, description, created_at")
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -80,10 +70,9 @@ export async function addProduct(input: NewCakeInput) {
     .insert({
     category: input.category,
     image_url: input.imageUrl || null,
-    title: input.title,
     description: input.description,
     })
-    .select("id, category, image_url, title, description, created_at")
+    .select("id, category, image_url, description, created_at")
     .single();
 
   if (error || !data) {

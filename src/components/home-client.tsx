@@ -21,7 +21,7 @@ type OrderForm = {
   pickupTime: string;
   referenceImageUrl: string;
   productCategory: string;
-  productName: string;
+  productId: string;
   productImageUrl: string;
   size: SizeOption;
   customSize: string;
@@ -39,7 +39,7 @@ const initialForm: OrderForm = {
   pickupTime: "",
   referenceImageUrl: "",
   productCategory: "",
-  productName: "",
+  productId: "",
   productImageUrl: "",
   size: "6",
   customSize: "",
@@ -51,10 +51,8 @@ const initialForm: OrderForm = {
 
 export type CakeItem = {
   id: string;
-  title: string;
   category: CakeCategory;
   imageUrl?: string;
-  titleI18n: I18nText;
   descriptionI18n: I18nText;
 };
 
@@ -301,7 +299,7 @@ export default function HomeClient({ initialProducts }: Props) {
     setSelectedCake(cake);
     setForm((prev) => ({
       ...prev,
-      productName: cake.title,
+      productId: cake.id,
       productCategory: cake.category,
       productImageUrl: cake.imageUrl || "",
     }));
@@ -337,7 +335,7 @@ export default function HomeClient({ initialProducts }: Props) {
     event.preventDefault();
     setMessage("");
 
-    if ((!form.productCategory.trim() || !form.productName.trim()) && !form.referenceImageUrl.trim()) {
+    if (!form.productId.trim() && !form.referenceImageUrl.trim()) {
       setMessage(t.pickFirst);
       return;
     }
@@ -389,7 +387,7 @@ export default function HomeClient({ initialProducts }: Props) {
       setShowSuccessDialog(true);
       setForm((prev) => ({
         ...initialForm,
-        productName: prev.productName,
+        productId: prev.productId,
         productCategory: prev.productCategory,
         productImageUrl: prev.productImageUrl,
       }));
@@ -503,7 +501,7 @@ export default function HomeClient({ initialProducts }: Props) {
                     <div className="relative aspect-square overflow-hidden rounded-lg">
                       <Image
                         src={work.imageUrl}
-                        alt={work.titleI18n[language]}
+                        alt={`${categoryLabels[language][work.category]} cake`}
                         fill
                         className="object-cover brightness-95 contrast-105"
                         sizes="(min-width: 768px) 33vw, 100vw"
@@ -512,7 +510,6 @@ export default function HomeClient({ initialProducts }: Props) {
                   ) : (
                     <div className="aspect-square rounded-lg bg-linear-to-br from-[#EEEAE4] to-[#E8E2D9]" />
                   )}
-                  <h3 className="mt-3 text-lg font-semibold">{work.titleI18n[language]}</h3>
                 </button>
               ))}
             </div>
@@ -522,7 +519,7 @@ export default function HomeClient({ initialProducts }: Props) {
                 {uploadingReferenceImage ? t.uploadingReferenceImage : t.uploadReferenceImage}
                 <input
                   type="file"
-                  accept="image/*"
+                  accept=".heic,.heif,image/*"
                   className="hidden"
                   disabled={uploadingReferenceImage}
                   onChange={(event) => {
@@ -558,12 +555,12 @@ export default function HomeClient({ initialProducts }: Props) {
             {selectedCake ? (
               <div className="mt-2 grid gap-4 lg:grid-cols-2">
                 <div className="rounded-lg border border-[#D8D2C9] bg-[#F4F1EC] p-4 text-sm text-zinc-700">
-                  {t.currentCake}：<span className="font-semibold">{selectedCake.titleI18n[language]}</span>
+                  {t.currentCake}：<span className="font-semibold">ID: {selectedCake.id.slice(0, 8)}</span>
                   {selectedCake.imageUrl ? (
                     <div className="relative mt-3 aspect-square w-full max-w-sm overflow-hidden rounded-lg border border-rose-200 bg-white">
                       <Image
                         src={selectedCake.imageUrl}
-                        alt={selectedCake.titleI18n[language]}
+                        alt="Selected cake image"
                         fill
                         className="object-cover brightness-95 contrast-105"
                         sizes="(min-width: 640px) 24rem, 100vw"
@@ -578,7 +575,7 @@ export default function HomeClient({ initialProducts }: Props) {
                       {uploadingReferenceImage ? t.uploadingReferenceImage : t.uploadReferenceImage}
                       <input
                         type="file"
-                        accept="image/*"
+                        accept=".heic,.heif,image/*"
                         className="hidden"
                         disabled={uploadingReferenceImage}
                         onChange={(event) => {
@@ -615,7 +612,7 @@ export default function HomeClient({ initialProducts }: Props) {
                       {uploadingReferenceImage ? t.uploadingReferenceImage : t.uploadReferenceImage}
                       <input
                         type="file"
-                        accept="image/*"
+                        accept=".heic,.heif,image/*"
                         className="hidden"
                         disabled={uploadingReferenceImage}
                         onChange={(event) => {

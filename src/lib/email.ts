@@ -8,7 +8,7 @@ type OrderPayload = {
   pickupTime: string;
   referenceImageUrl?: string;
   productCategory: string;
-  productName: string;
+  productId: string;
   productImageUrl?: string;
   size: string;
   filling: string;
@@ -66,8 +66,8 @@ export async function sendOrderEmail(order: OrderPayload) {
   const categoryText = order.productCategory
     ? categoryMap[order.productCategory] || order.productCategory
     : "未选择（参考图定制）";
-  const productNameText = order.productName || "未选择（参考图定制）";
-  const subjectProduct = order.productName || "参考图定制";
+  const productIdText = order.productId ? `ID: ${order.productId.slice(0, 8)}` : "未选择（参考图定制）";
+  const subjectProduct = order.productId ? `展示区选款 ${order.productId.slice(0, 8)}` : "参考图定制";
 
   const transporter = nodemailer.createTransport({
     host,
@@ -87,7 +87,7 @@ export async function sendOrderEmail(order: OrderPayload) {
 取货日期：${order.pickupDate}
 取货时间：${order.pickupTime}
 分类：${categoryText}
-蛋糕款式：${productNameText}
+蛋糕ID：${productIdText}
 尺寸：${sizeMap[order.size] || order.size}
 夹馅：${fillingMap[order.filling] || order.filling}
 联系方式：${contact || "未提供"}
@@ -106,7 +106,7 @@ export async function sendOrderEmail(order: OrderPayload) {
       <p><strong>取货日期：</strong>${escapeHtml(order.pickupDate)}</p>
       <p><strong>取货时间：</strong>${escapeHtml(order.pickupTime)}</p>
       <p><strong>分类：</strong>${escapeHtml(categoryText)}</p>
-      <p><strong>蛋糕款式：</strong>${escapeHtml(productNameText)}</p>
+      <p><strong>蛋糕ID：</strong>${escapeHtml(productIdText)}</p>
       <p><strong>尺寸：</strong>${escapeHtml(sizeMap[order.size] || order.size)}</p>
       <p><strong>夹馅：</strong>${escapeHtml(fillingMap[order.filling] || order.filling)}</p>
       <p><strong>联系方式：</strong>${escapeHtml(contact || "未提供")}</p>

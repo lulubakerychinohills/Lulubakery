@@ -17,7 +17,6 @@ export async function POST(request: NextRequest) {
 
     const body = (await request.json()) as Record<string, unknown>;
     const category = toText(body.category) as CakeCategory;
-    const title = toText(body.title);
     const description = toText(body.description);
     const imageUrl = toText(body.imageUrl);
 
@@ -25,11 +24,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "分类无效。" }, { status: 400 });
     }
 
-    if (!title) {
-      return NextResponse.json({ message: "请填写英文标题。" }, { status: 400 });
-    }
-
-    const product = await addProduct({ category, imageUrl, title, description });
+    const product = await addProduct({ category, imageUrl, description });
     return NextResponse.json({ ok: true, product });
   } catch (error) {
     const rawMessage = error instanceof Error ? error.message : "上传失败。";
