@@ -1,5 +1,4 @@
 const ALLOWED_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif", ".heic", ".heif"]);
-const HEIC_EXTENSIONS = new Set([".heic", ".heif"]);
 
 type PreparedUpload = {
   buffer: Buffer;
@@ -40,27 +39,5 @@ function getContentType(fileType: string, ext: string) {
 export async function prepareImageForUpload(file: File, ext: string): Promise<PreparedUpload> {
   const buffer = Buffer.from(await file.arrayBuffer());
   const contentType = getContentType(file.type, ext);
-
-  if (!HEIC_EXTENSIONS.has(ext)) {
-    return { buffer, ext, contentType };
-  }
-
-  // heic-convert returns a Node Buffer when output format is JPEG.
-  const heicConvert = (await import("heic-convert")).default as unknown as (args: {
-    buffer: Buffer;
-    format: "JPEG";
-    quality: number;
-  }) => Promise<Buffer>;
-
-  const jpgBuffer = await heicConvert({
-    buffer,
-    format: "JPEG",
-    quality: 0.9,
-  });
-
-  return {
-    buffer: jpgBuffer,
-    ext: ".jpg",
-    contentType: "image/jpeg",
-  };
+  return { buffer, ext, contentType };
 }
