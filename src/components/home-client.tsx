@@ -349,6 +349,7 @@ function WorkShowcaseCard({
             src={work.imageUrl}
             alt={`${categoryLabels[language][work.category as CakeCategory] ?? work.category} cake`}
             fill
+            unoptimized={work.category === "sweet"}
             loading="lazy"
             decoding="async"
             fetchPriority="low"
@@ -722,6 +723,7 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
                         src={selectedCake.imageUrl}
                         alt="Selected cake image"
                         fill
+                        unoptimized={selectedCake.category === "sweet"}
                         loading="lazy"
                         decoding="async"
                         className="object-cover brightness-95 contrast-105"

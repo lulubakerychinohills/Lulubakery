@@ -330,7 +330,16 @@ export default function AdminPage() {
                 <p className="mt-1 text-xs text-zinc-500">{previewUrl}</p>
                 {canPreview ? (
                   <div className="relative mt-3 h-40 w-full max-w-xs overflow-hidden rounded-lg border border-[#D8D2C9] bg-white">
-                    <Image src={previewUrl} alt="产品预览图" fill loading="lazy" decoding="async" className="object-cover" sizes="20rem" />
+                    <Image
+                      src={previewUrl}
+                      alt="产品预览图"
+                      fill
+                      unoptimized={form.category === "sweet"}
+                      loading="lazy"
+                      decoding="async"
+                      className="object-cover"
+                      sizes="20rem"
+                    />
                   </div>
                 ) : (
                   <p className="mt-2 text-xs text-amber-700">
@@ -384,7 +393,16 @@ export default function AdminPage() {
                 <div className="flex items-center gap-3">
                   {item.imageUrl ? (
                     <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md border border-[#DDD6CE] bg-[#F4F1EC]">
-                      <Image src={item.imageUrl} alt="产品图片" fill loading="lazy" decoding="async" className="object-cover" sizes="3rem" />
+                      <Image
+                        src={item.imageUrl}
+                        alt="产品图片"
+                        fill
+                        unoptimized={item.category === "sweet"}
+                        loading="lazy"
+                        decoding="async"
+                        className="object-cover"
+                        sizes="3rem"
+                      />
                     </div>
                   ) : (
                     <div className="h-12 w-12 shrink-0 rounded-md border border-zinc-200 bg-zinc-50" />
