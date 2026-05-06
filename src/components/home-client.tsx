@@ -630,9 +630,15 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
                 </div>
               ) : (
                 <div className="mt-5">
-                  <p className="text-sm font-semibold text-[#5C4B43]">{t.sweetMenuHeading}</p>
-                  <p className="mt-1 text-sm text-zinc-600">{t.sweetMenuIntro}</p>
-                  <figure className="mx-auto mt-4 max-w-[min(100%,720px)] overflow-hidden rounded-xl border border-[#D8D2C9] bg-white shadow-sm">
+                  <div className="mt-4">
+                    <Link
+                      href="/sweet/photos"
+                      className="inline-flex text-sm font-semibold text-[#5C4B43] underline decoration-[#8B776A] underline-offset-2 hover:text-[#4D3F38]"
+                    >
+                      {t.viewDessertPhotosLink}
+                    </Link>
+                  </div>
+                  <figure className="mx-auto mt-4 overflow-hidden rounded-xl border border-[#D8D2C9] bg-white shadow-sm">
                     {/* eslint-disable-next-line @next/next/no-img-element -- 价目长图 */}
                     <img
                       src={DESSERT_MENU_PUBLIC_PATH}
@@ -645,14 +651,7 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
                       decoding="async"
                     />
                   </figure>
-                  <div className="mt-4">
-                    <Link
-                      href="/sweet/photos"
-                      className="inline-flex text-sm font-semibold text-[#5C4B43] underline decoration-[#8B776A] underline-offset-2 hover:text-[#4D3F38]"
-                    >
-                      {t.viewDessertPhotosLink}
-                    </Link>
-                  </div>
+
                 </div>
               )
             ) : (
