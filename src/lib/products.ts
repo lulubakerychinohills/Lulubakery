@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { getSupabaseClient } from "@/lib/supabase";
 import { normalizeSupabaseStoragePublicUrl } from "@/lib/supabase-storage-url";
 
@@ -100,7 +101,7 @@ async function nextProductSortOrder(supabase: ReturnType<typeof getSupabaseClien
   return max + 1;
 }
 
-export async function readProducts(): Promise<ProductReadResult> {
+async function fetchProductsFromSupabase(): Promise<ProductReadResult> {
   const supabase = getSupabaseClient();
   const { data, error } = await supabase
     .from("products")
@@ -116,6 +117,24 @@ export async function readProducts(): Promise<ProductReadResult> {
     products: sorted.map(mapRowToCakeItem),
     source: "supabase",
   };
+}
+
+/** 管理后台 / API 拉取：始终读库，不走缓存。 */
+export async function readProductsFresh(): Promise<ProductReadResult> {
+  return fetchProductsFromSupabase();
+}
+
+const readProductsCached = unstable_cache(fetchProductsFromSupabase, ["products-catalog"], {
+  revalidate: 300,
+  tags: ["products"],
+});
+
+/**
+ * 前台页面用：结果带标签 `products`，后台改库后应 `revalidateTag("products")`。
+ * 与页面 `revalidate` 配合，减少 TTFB、加快含图路由首屏。
+ */
+export async function readProducts(): Promise<ProductReadResult> {
+  return readProductsCached();
 }
 
 export async function addProduct(input: NewCakeInput) {

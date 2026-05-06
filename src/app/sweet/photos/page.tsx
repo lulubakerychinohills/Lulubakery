@@ -3,7 +3,7 @@ import HomeClient from "@/components/home-client";
 import { getSiteUrl } from "@/lib/site";
 import { readProducts } from "@/lib/products";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Dessert Photos",

@@ -349,6 +349,9 @@ function WorkShowcaseCard({
             src={work.imageUrl}
             alt={`${categoryLabels[language][work.category as CakeCategory] ?? work.category} cake`}
             fill
+            loading="lazy"
+            decoding="async"
+            fetchPriority="low"
             className="object-cover brightness-95 contrast-105"
             sizes="(min-width: 1024px) 20vw, (min-width: 768px) 33vw, 100vw"
           />
@@ -517,7 +520,7 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <div className="relative h-12 w-12 overflow-hidden rounded-full border border-[#D8D2C9] bg-white/90" onClick={() => router.push("/")}>
-                <Image src="/brand/avatar.png" alt="Lulu Bakery avatar" fill className="object-cover" sizes="48px" priority />
+                <Image src="/brand/avatar.webp" alt="Lulu Bakery avatar" fill className="object-cover" sizes="48px" priority />
               </div>
               <div>
                 <p className="text-sm font-semibold text-[#4C403A]">{t.brand}</p>
@@ -555,7 +558,14 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
           <p className="mt-3 max-w-3xl text-zinc-700">{t.intro}</p>
           <div className="mt-5 overflow-hidden rounded-xl border border-[#D8D2C9] bg-white/85">
             <div className="relative h-52 w-full sm:h-64">
-              <Image src="/products/cupcake.jpg" alt="Assorted bakery cakes" fill className="object-cover" />
+              <Image
+                src="/products/cupcake.webp"
+                alt="Assorted bakery cakes"
+                fill
+                priority
+                className="object-cover"
+                sizes="100vw"
+              />
             </div>
           </div>
         </section>
@@ -647,8 +657,9 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
                       height={DESSERT_MENU_PIXEL_HEIGHT}
                       className="block h-auto max-w-full"
                       style={{ width: `min(100%, ${DESSERT_MENU_PIXEL_WIDTH}px)` }}
-                      loading="lazy"
+                      loading={pathname === "/sweet" ? "eager" : "lazy"}
                       decoding="async"
+                      fetchPriority={pathname === "/sweet" ? "high" : "low"}
                     />
                   </figure>
 
@@ -711,6 +722,8 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
                         src={selectedCake.imageUrl}
                         alt="Selected cake image"
                         fill
+                        loading="lazy"
+                        decoding="async"
                         className="object-cover brightness-95 contrast-105"
                         sizes="(min-width: 640px) 24rem, 100vw"
                       />
@@ -743,7 +756,15 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
                   </div>
                   {form.referenceImageUrl ? (
                     <div className="relative mt-2 aspect-square w-full max-w-sm overflow-hidden rounded-lg border border-rose-200 bg-white">
-                      <Image src={form.referenceImageUrl} alt="Reference image" fill className="object-cover" sizes="18rem" />
+                      <Image
+                        src={form.referenceImageUrl}
+                        alt="Reference image"
+                        fill
+                        loading="lazy"
+                        decoding="async"
+                        className="object-cover"
+                        sizes="18rem"
+                      />
                     </div>
                   ) : null}
                 </div>
@@ -781,7 +802,15 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
                   </div>
                   {form.referenceImageUrl ? (
                     <div className="relative mt-2 aspect-square w-full max-w-sm overflow-hidden rounded-lg border border-rose-200 bg-white">
-                      <Image src={form.referenceImageUrl} alt="Reference image" fill className="object-cover" sizes="18rem" />
+                      <Image
+                        src={form.referenceImageUrl}
+                        alt="Reference image"
+                        fill
+                        loading="lazy"
+                        decoding="async"
+                        className="object-cover"
+                        sizes="18rem"
+                      />
                     </div>
                   ) : null}
                 </div>

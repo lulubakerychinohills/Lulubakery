@@ -5,9 +5,9 @@ import { getSupabaseAdminClient } from "@/lib/supabase";
 import {
   isSupportedImageFile,
   MAX_IMAGE_UPLOAD_BYTES,
-  prepareImageForUpload,
   resolveImageExtension,
 } from "@/lib/upload-image";
+import { prepareImageForUpload } from "@/lib/prepare-image-upload";
 
 export const runtime = "nodejs";
 

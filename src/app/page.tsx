@@ -3,7 +3,8 @@ import HomeClient from "@/components/home-client";
 import { DEFAULT_DESCRIPTION, SITE_NAME, getSiteUrl } from "@/lib/site";
 import { readProducts } from "@/lib/products";
 
-export const dynamic = "force-dynamic";
+/** 与 readProducts 缓存及后台 revalidateTag 配合，降低首屏等待 Supabase 的时间 */
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Custom Cakes & Desserts",

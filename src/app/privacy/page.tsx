@@ -102,7 +102,7 @@ export default function PrivacyPage() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <div className="relative h-12 w-12 overflow-hidden rounded-full border border-[#D8D2C9] bg-white/90" onClick={() => router.push("/")}>
-                <Image src="/brand/avatar.png" alt="Lulu Bakery avatar" fill className="object-cover" sizes="48px" priority />
+                <Image src="/brand/avatar.webp" alt="Lulu Bakery avatar" fill className="object-cover" sizes="48px" priority />
               </div>
               <div>
                 <p className="text-sm font-semibold text-[#4C403A]">Lulu Bakery</p>

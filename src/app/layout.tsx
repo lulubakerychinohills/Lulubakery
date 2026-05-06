@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     description: DEFAULT_DESCRIPTION,
     images: [
       {
-        url: "/brand/avatar.png",
+        url: "/brand/avatar.webp",
         width: 1024,
         height: 1024,
         alt: `${SITE_NAME} logo`,
@@ -55,7 +55,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: `${SITE_NAME} | Custom Cakes in Chino Hills`,
     description: DEFAULT_DESCRIPTION,
-    images: ["/brand/avatar.png"],
+    images: ["/brand/avatar.webp"],
   },
   robots: { index: true, follow: true },
   icons: {
