@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 type Language = "zh" | "en" | "es";
 
@@ -93,14 +94,14 @@ const copy = {
 export default function AboutPage() {
   const [language, setLanguage] = useState<Language>("en");
   const t = copy[language];
-
+  const router = useRouter();
   return (
     <main className="min-h-screen bg-linear-to-b from-[#F8F7F5] via-[#F6F5F2] to-[#F3F1ED] py-10 text-zinc-800">
       <div className="mx-auto max-w-4xl px-6">
         <section className="rounded-2xl bg-linear-to-r from-[#E7E3DE] via-[#E3DED8] to-[#DED8D0] p-8 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="relative h-12 w-12 overflow-hidden rounded-full border border-[#D8D2C9] bg-white/90">
+              <div className="relative h-12 w-12 overflow-hidden rounded-full border border-[#D8D2C9] bg-white/90" onClick={() => router.push("/")}>
                 <Image src="/brand/avatar.png" alt="Lulu Bakery avatar" fill className="object-cover" sizes="48px" priority />
               </div>
               <div>

@@ -516,7 +516,7 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
         <section className="rounded-2xl bg-linear-to-r from-[#E7E3DE] via-[#E3DED8] to-[#DED8D0] p-8 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="relative h-12 w-12 overflow-hidden rounded-full border border-[#D8D2C9] bg-white/90">
+              <div className="relative h-12 w-12 overflow-hidden rounded-full border border-[#D8D2C9] bg-white/90" onClick={() => router.push("/")}>
                 <Image src="/brand/avatar.png" alt="Lulu Bakery avatar" fill className="object-cover" sizes="48px" priority />
               </div>
               <div>
