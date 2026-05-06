@@ -2,7 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import {
+  DESSERT_MENU_PIXEL_HEIGHT,
+  DESSERT_MENU_PIXEL_WIDTH,
+  DESSERT_MENU_PUBLIC_PATH,
+} from "@/lib/menu-image";
 import { MAX_IMAGE_UPLOAD_BYTES } from "@/lib/upload-image";
 
 type TabKey = "showcase" | "order";
@@ -10,7 +16,7 @@ type Language = "zh" | "en" | "es";
 type CakeCategory = "men" | "women" | "kids" | "sweet" | "other";
 type CategoryFilter = "all" | CakeCategory;
 type SizeOption = "4" | "6" | "8" | "10" | "double" | "other";
-type FillingOption = "strawberry" | "mango" | "oreo" | "other";
+type FillingOption = "strawberry" | "mango" | "durian" | "oreo" | "other";
 
 type I18nText = Record<Language, string>;
 
@@ -76,7 +82,7 @@ const routeCategoryMap: Record<string, CategoryFilter> = {
   "/cakeforother": "other",
 };
 const sizeOptions: SizeOption[] = ["4", "6", "8", "10", "double", "other"];
-const fillingOptions: FillingOption[] = ["strawberry", "mango", "oreo", "other"];
+const fillingOptions: FillingOption[] = ["strawberry", "mango", "durian", "oreo", "other"];
 
 const languageLabels: Record<Language, string> = {
   zh: "中文",
@@ -114,18 +120,21 @@ const fillingLabels: Record<Language, Record<FillingOption, string>> = {
   zh: {
     strawberry: "草莓",
     mango: "芒果",
+    durian: "榴莲",
     oreo: "奥利奥奶油",
     other: "其他",
   },
   en: {
     strawberry: "Strawberry",
     mango: "Mango",
+    durian: "Durian",
     oreo: "Oreo Cream",
     other: "Other",
   },
   es: {
     strawberry: "Fresa",
     mango: "Mango",
+    durian: "Durian",
     oreo: "Crema de Oreo",
     other: "Otro",
   },
@@ -141,6 +150,13 @@ const copy = {
     tabOrder: "订购",
     aboutLink: "关于我们",
     privacyLink: "隐私政策",
+    sweetStylesHeading: "甜品作品图",
+    sweetMenuHeading: "价目与菜单",
+    sweetMenuIntro: "以下为甜品价目与说明；实拍款式请进入作品图页面浏览。",
+    sweetPhotosHint: "以下为甜品款式实拍，点击图片可下单。",
+    viewDessertPhotosLink: "查看甜品作品图",
+    backToDessertMenuLink: "返回甜品价目菜单",
+    sweetEmpty: "暂无作品图，可先返回价目菜单参考。",
     showcaseTitle: "蛋糕展示",
     showcaseHint: "先选择分类，再点击具体款式查看订购细节。",
     showcaseCustomHint: "没有看到想要的款式？你可以上传参考图片，我们会按你的想法沟通定制。",
@@ -196,6 +212,13 @@ const copy = {
     tabOrder: "Order",
     aboutLink: "About Us",
     privacyLink: "Privacy Policy",
+    sweetStylesHeading: "Dessert photos",
+    sweetMenuHeading: "Menu & prices",
+    sweetMenuIntro: "Dessert menu and prices below. Use the link for photos of our work.",
+    sweetPhotosHint: "Photos of dessert styles below. Tap an image to order.",
+    viewDessertPhotosLink: "View dessert photos",
+    backToDessertMenuLink: "Back to menu & prices",
+    sweetEmpty: "No photos yet. Go back to the menu for options and pricing.",
     showcaseTitle: "Cake Showcase",
     showcaseHint: "Choose a category first, then open a cake for ordering details.",
     showcaseCustomHint: "If you cannot find the style you want, upload a reference photo for custom discussion.",
@@ -251,6 +274,13 @@ const copy = {
     tabOrder: "Pedido",
     aboutLink: "Sobre Nosotros",
     privacyLink: "Politica de Privacidad",
+    sweetStylesHeading: "Fotos de postres",
+    sweetMenuHeading: "Carta y precios",
+    sweetMenuIntro: "Menu y precios abajo. El enlace lleva a las fotos.",
+    sweetPhotosHint: "Fotos de estilos a continuacion. Toca una imagen para pedir.",
+    viewDessertPhotosLink: "Ver fotos de postres",
+    backToDessertMenuLink: "Volver al menu y precios",
+    sweetEmpty: "Aun no hay fotos. Vuelve al menu.",
     showcaseTitle: "Galeria de Pasteles",
     showcaseHint: "Primero elige una categoria y luego abre un pastel para ver detalles.",
     showcaseCustomHint: "Si no encuentras el estilo que quieres, sube una foto de referencia para personalizar.",
@@ -298,6 +328,38 @@ const copy = {
   },
 } as const;
 
+function WorkShowcaseCard({
+  work,
+  language,
+  onSelect,
+}: {
+  work: CakeItem;
+  language: Language;
+  onSelect: (cake: CakeItem) => void;
+}) {
+  return (
+    <button
+      type="button"
+      className="rounded-xl border border-[#DDD6CE] bg-white p-5 text-left shadow-sm transition hover:border-[#CDBFAF] hover:shadow-md"
+      onClick={() => onSelect(work)}
+    >
+      {work.imageUrl ? (
+        <div className="relative aspect-square overflow-hidden rounded-lg">
+          <Image
+            src={work.imageUrl}
+            alt={`${categoryLabels[language][work.category as CakeCategory] ?? work.category} cake`}
+            fill
+            className="object-cover brightness-95 contrast-105"
+            sizes="(min-width: 1024px) 20vw, (min-width: 768px) 33vw, 100vw"
+          />
+        </div>
+      ) : (
+        <div className="aspect-square rounded-lg bg-linear-to-br from-[#EEEAE4] to-[#E8E2D9]" />
+      )}
+    </button>
+  );
+}
+
 type Props = {
   initialProducts: CakeItem[];
   initialCategory?: CategoryFilter;
@@ -305,6 +367,8 @@ type Props = {
 };
 
 export default function HomeClient({ initialProducts, initialCategory = "all", initialTab = "showcase" }: Props) {
+  const pathname = usePathname();
+  const router = useRouter();
   const [language, setLanguage] = useState<Language>("en");
   const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>(initialCategory);
@@ -324,17 +388,17 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
   );
 
   useEffect(() => {
-    const onPopState = () => {
-      const category = routeCategoryMap[window.location.pathname];
-      if (category) {
-        setActiveCategory(category);
-        setActiveTab("showcase");
-      }
-    };
-
-    window.addEventListener("popstate", onPopState);
-    return () => window.removeEventListener("popstate", onPopState);
-  }, []);
+    if (pathname === "/sweet/photos") {
+      setActiveCategory("sweet");
+      setActiveTab("showcase");
+      return;
+    }
+    const category = routeCategoryMap[pathname];
+    if (category) {
+      setActiveCategory(category);
+      setActiveTab("showcase");
+    }
+  }, [pathname]);
 
   const goOrder = (cake: CakeItem) => {
     setSelectedCake(cake);
@@ -496,7 +560,7 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
           </div>
         </section>
 
-        <section className="mt-8 flex flex-wrap gap-3">
+        <section className="mt-8 flex flex-wrap items-center gap-3">
           <button
             type="button"
             onClick={() => setActiveTab("showcase")}
@@ -528,9 +592,12 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
                   onClick={() => {
                     setActiveCategory(category);
                     setActiveTab("showcase");
-                    const targetRoute = categoryRouteMap[category];
-                    if (window.location.pathname !== targetRoute) {
-                      window.history.pushState({}, "", targetRoute);
+                    let targetRoute = categoryRouteMap[category];
+                    if (category === "sweet" && pathname === "/sweet/photos") {
+                      targetRoute = "/sweet";
+                    }
+                    if (pathname !== targetRoute) {
+                      router.push(targetRoute);
                     }
                   }}
                   className={`rounded-full px-4 py-2 text-sm font-semibold transition ${category === activeCategory ? "bg-[#5C4B43] text-white" : "bg-[#F1ECE7] text-[#5C4B43] hover:bg-[#E6DED4]"
@@ -541,30 +608,60 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
               ))}
             </div>
 
-            <div className="mt-5 grid gap-4 md:grid-cols-3">
-              {filteredWorks.map((work) => (
-                <button
-                  key={work.id}
-                  type="button"
-                  className="rounded-xl border border-[#DDD6CE] bg-white p-5 text-left shadow-sm transition hover:border-[#CDBFAF] hover:shadow-md"
-                  onClick={() => goOrder(work)}
-                >
-                  {work.imageUrl ? (
-                    <div className="relative aspect-square overflow-hidden rounded-lg">
-                      <Image
-                        src={work.imageUrl}
-                        alt={`${categoryLabels[language][work.category as CakeCategory] ?? work.category} cake`}
-                        fill
-                        className="object-cover brightness-95 contrast-105"
-                        sizes="(min-width: 768px) 33vw, 100vw"
-                      />
-                    </div>
-                  ) : (
-                    <div className="aspect-square rounded-lg bg-linear-to-br from-[#EEEAE4] to-[#E8E2D9]" />
-                  )}
-                </button>
-              ))}
-            </div>
+            {activeCategory === "sweet" ? (
+              pathname === "/sweet/photos" ? (
+                <div className="mt-5">
+                  <Link
+                    href="/sweet"
+                    className="inline-flex text-sm font-semibold text-[#5C4B43] underline decoration-[#8B776A] underline-offset-2 hover:text-[#4D3F38]"
+                  >
+                    {t.backToDessertMenuLink}
+                  </Link>
+                  <p className="mt-4 text-sm font-semibold text-[#5C4B43]">{t.sweetStylesHeading}</p>
+                  <p className="mt-1 text-sm text-zinc-600">{t.sweetPhotosHint}</p>
+                  <div className="mt-4 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+                    {filteredWorks.map((work) => (
+                      <WorkShowcaseCard key={work.id} work={work} language={language} onSelect={goOrder} />
+                    ))}
+                  </div>
+                  {filteredWorks.length === 0 ? (
+                    <p className="mt-4 text-sm text-zinc-500">{t.sweetEmpty}</p>
+                  ) : null}
+                </div>
+              ) : (
+                <div className="mt-5">
+                  <p className="text-sm font-semibold text-[#5C4B43]">{t.sweetMenuHeading}</p>
+                  <p className="mt-1 text-sm text-zinc-600">{t.sweetMenuIntro}</p>
+                  <figure className="mx-auto mt-4 max-w-[min(100%,720px)] overflow-hidden rounded-xl border border-[#D8D2C9] bg-white shadow-sm">
+                    {/* eslint-disable-next-line @next/next/no-img-element -- 价目长图 */}
+                    <img
+                      src={DESSERT_MENU_PUBLIC_PATH}
+                      alt="Lu Lu dessert menu: scones, box cakes, mochi, prices"
+                      width={DESSERT_MENU_PIXEL_WIDTH}
+                      height={DESSERT_MENU_PIXEL_HEIGHT}
+                      className="block h-auto max-w-full"
+                      style={{ width: `min(100%, ${DESSERT_MENU_PIXEL_WIDTH}px)` }}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </figure>
+                  <div className="mt-4">
+                    <Link
+                      href="/sweet/photos"
+                      className="inline-flex text-sm font-semibold text-[#5C4B43] underline decoration-[#8B776A] underline-offset-2 hover:text-[#4D3F38]"
+                    >
+                      {t.viewDessertPhotosLink}
+                    </Link>
+                  </div>
+                </div>
+              )
+            ) : (
+              <div className="mt-5 grid gap-4 md:grid-cols-3">
+                {filteredWorks.map((work) => (
+                  <WorkShowcaseCard key={work.id} work={work} language={language} onSelect={goOrder} />
+                ))}
+              </div>
+            )}
             <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4">
               <p className="text-sm text-amber-800">{t.showcaseCustomHint}</p>
               <p className="mt-2 text-xs text-amber-900/80">{t.imageUploadHint}</p>

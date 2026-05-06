@@ -14,6 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/cakeforkids",
     "/cakeforother",
     "/sweet",
+    "/sweet/photos",
   ];
 
   return paths.map((path) => ({

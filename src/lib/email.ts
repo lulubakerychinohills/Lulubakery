@@ -49,6 +49,7 @@ const sizeMap: Record<string, string> = {
 const fillingMap: Record<string, string> = {
   strawberry: "草莓",
   mango: "芒果",
+  durian: "榴莲",
   oreo: "奥利奥奶油",
   other: "其他",
 };

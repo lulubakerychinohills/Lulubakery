@@ -36,6 +36,7 @@ const copy = {
     contactBody: "lulubakerychinohills@gmail.com",
     cta: "返回首页下单",
     privacyCta: "查看隐私政策",
+    menuCta: "甜品价目表",
   },
   en: {
     title: "About Lulu Bakery",
@@ -60,6 +61,7 @@ const copy = {
     contactBody: "lulubakerychinohills@gmail.com",
     cta: "Back to Home & Order",
     privacyCta: "View Privacy Policy",
+    menuCta: "Dessert Menu & Prices",
   },
   es: {
     title: "Sobre Lulu Bakery",
@@ -84,6 +86,7 @@ const copy = {
     contactBody: "lulubakerychinohills@gmail.com",
     cta: "Volver al Inicio",
     privacyCta: "Ver Politica de Privacidad",
+    menuCta: "Carta de Postres",
   },
 } as const;
 
@@ -167,6 +170,12 @@ export default function AboutPage() {
             className="inline-flex rounded-full border border-[#D8D2C9] bg-white px-5 py-2 text-sm font-semibold text-[#5C4B43] transition hover:bg-[#F4F1EC]"
           >
             {t.privacyCta}
+          </Link>
+          <Link
+            href="/sweet"
+            className="inline-flex rounded-full border border-[#D8D2C9] bg-white px-5 py-2 text-sm font-semibold text-[#5C4B43] transition hover:bg-[#F4F1EC]"
+          >
+            {t.menuCta}
           </Link>
         </div>
       </div>
