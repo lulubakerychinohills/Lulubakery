@@ -1,3 +1,6 @@
+/** 单张图片最大体积：小于或等于该字节数均可上传（与接口校验一致）。 */
+export const MAX_IMAGE_UPLOAD_BYTES = 10 * 1024 * 1024;
+
 const ALLOWED_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif", ".heic", ".heif"]);
 
 type PreparedUpload = {

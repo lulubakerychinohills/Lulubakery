@@ -2,11 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
+import { MAX_IMAGE_UPLOAD_BYTES } from "@/lib/upload-image";
 
 type TabKey = "showcase" | "order";
 type Language = "zh" | "en" | "es";
-type CakeCategory = "men" | "women" | "kids" | "other";
+type CakeCategory = "men" | "women" | "kids" | "sweet" | "other";
 type CategoryFilter = "all" | CakeCategory;
 type SizeOption = "4" | "6" | "8" | "10" | "double" | "other";
 type FillingOption = "strawberry" | "mango" | "oreo" | "other";
@@ -54,9 +55,26 @@ export type CakeItem = {
   category: CakeCategory;
   imageUrl?: string;
   descriptionI18n: I18nText;
+  sortOrder: number;
 };
 
-const categories: CategoryFilter[] = ["all", "men", "women", "kids", "other"];
+const categories: CategoryFilter[] = ["all", "men", "women", "kids", "sweet", "other"];
+const categoryRouteMap: Record<CategoryFilter, string> = {
+  all: "/",
+  men: "/cakeformen",
+  women: "/cakeforwomen",
+  kids: "/cakeforkids",
+  sweet: "/sweet",
+  other: "/cakeforother",
+};
+const routeCategoryMap: Record<string, CategoryFilter> = {
+  "/": "all",
+  "/cakeformen": "men",
+  "/cakeforwomen": "women",
+  "/cakeforkids": "kids",
+  "/sweet": "sweet",
+  "/cakeforother": "other",
+};
 const sizeOptions: SizeOption[] = ["4", "6", "8", "10", "double", "other"];
 const fillingOptions: FillingOption[] = ["strawberry", "mango", "oreo", "other"];
 
@@ -67,9 +85,9 @@ const languageLabels: Record<Language, string> = {
 };
 
 const categoryLabels: Record<Language, Record<CategoryFilter, string>> = {
-  zh: { all: "全部", men: "男士", women: "女士", kids: "儿童", other: "其他" },
-  en: { all: "All", men: "Men", women: "Women", kids: "Kids", other: "Other" },
-  es: { all: "Todo", men: "Hombres", women: "Mujeres", kids: "Ninos", other: "Otro" },
+  zh: { all: "全部", men: "男士", women: "女士", kids: "儿童", sweet: "甜品", other: "其他" },
+  en: { all: "All", men: "Men", women: "Women", kids: "Kids", sweet: "Desserts", other: "Other" },
+  es: { all: "Todo", men: "Hombres", women: "Mujeres", kids: "Ninos", sweet: "Postres", other: "Otro" },
 };
 
 const sizeLabels: Record<Language, Record<SizeOption, string>> = {
@@ -145,6 +163,8 @@ const copy = {
     referenceImage: "参考图片（可选）",
     uploadReferenceImage: "上传参考图片",
     uploadingReferenceImage: "上传中...",
+    imageUploadHint: "图片文件须小于或等于 10MB。",
+    imageTooLarge: "图片超过 10MB，请压缩后再上传。",
     notes: "备注",
     submit: "提交订单",
     submitting: "提交中...",
@@ -198,6 +218,8 @@ const copy = {
     referenceImage: "Reference Image (Optional)",
     uploadReferenceImage: "Upload Reference Image",
     uploadingReferenceImage: "Uploading...",
+    imageUploadHint: "Image files must be 10 MB or smaller.",
+    imageTooLarge: "This image is over 10 MB. Please compress it and try again.",
     notes: "Notes",
     submit: "Submit Order",
     submitting: "Submitting...",
@@ -251,6 +273,8 @@ const copy = {
     referenceImage: "Imagen de referencia (Opcional)",
     uploadReferenceImage: "Subir imagen de referencia",
     uploadingReferenceImage: "Subiendo...",
+    imageUploadHint: "La imagen debe pesar como maximo 10 MB.",
+    imageTooLarge: "La imagen supera 10 MB. Comprimela y vuelve a intentarlo.",
     notes: "Notas",
     submit: "Enviar Pedido",
     submitting: "Enviando...",
@@ -276,13 +300,14 @@ const copy = {
 
 type Props = {
   initialProducts: CakeItem[];
+  initialCategory?: CategoryFilter;
+  initialTab?: TabKey;
 };
 
-export default function HomeClient({ initialProducts }: Props) {
+export default function HomeClient({ initialProducts, initialCategory = "all", initialTab = "showcase" }: Props) {
   const [language, setLanguage] = useState<Language>("en");
-  const [activeTab, setActiveTab] = useState<TabKey>("showcase");
-  const [activeCategory, setActiveCategory] = useState<CategoryFilter>("all");
-  const [products] = useState<CakeItem[]>(initialProducts);
+  const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
+  const [activeCategory, setActiveCategory] = useState<CategoryFilter>(initialCategory);
   const [selectedCake, setSelectedCake] = useState<CakeItem | null>(null);
   const [form, setForm] = useState<OrderForm>(initialForm);
   const [submitting, setSubmitting] = useState(false);
@@ -291,9 +316,25 @@ export default function HomeClient({ initialProducts }: Props) {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const t = copy[language];
   const filteredWorks = useMemo(
-    () => (activeCategory === "all" ? products : products.filter((work) => work.category === activeCategory)),
-    [activeCategory, products],
+    () =>
+      activeCategory === "all"
+        ? initialProducts
+        : initialProducts.filter((work) => work.category === activeCategory),
+    [activeCategory, initialProducts],
   );
+
+  useEffect(() => {
+    const onPopState = () => {
+      const category = routeCategoryMap[window.location.pathname];
+      if (category) {
+        setActiveCategory(category);
+        setActiveTab("showcase");
+      }
+    };
+
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
 
   const goOrder = (cake: CakeItem) => {
     setSelectedCake(cake);
@@ -309,6 +350,10 @@ export default function HomeClient({ initialProducts }: Props) {
 
   const onReferenceImageSelected = async (file: File) => {
     setMessage("");
+    if (file.size > MAX_IMAGE_UPLOAD_BYTES) {
+      setMessage(t.imageTooLarge);
+      return;
+    }
     setUploadingReferenceImage(true);
     try {
       const formData = new FormData();
@@ -480,7 +525,14 @@ export default function HomeClient({ initialProducts }: Props) {
                 <button
                   key={category}
                   type="button"
-                  onClick={() => setActiveCategory(category)}
+                  onClick={() => {
+                    setActiveCategory(category);
+                    setActiveTab("showcase");
+                    const targetRoute = categoryRouteMap[category];
+                    if (window.location.pathname !== targetRoute) {
+                      window.history.pushState({}, "", targetRoute);
+                    }
+                  }}
                   className={`rounded-full px-4 py-2 text-sm font-semibold transition ${category === activeCategory ? "bg-[#5C4B43] text-white" : "bg-[#F1ECE7] text-[#5C4B43] hover:bg-[#E6DED4]"
                     }`}
                 >
@@ -501,7 +553,7 @@ export default function HomeClient({ initialProducts }: Props) {
                     <div className="relative aspect-square overflow-hidden rounded-lg">
                       <Image
                         src={work.imageUrl}
-                        alt={`${categoryLabels[language][work.category]} cake`}
+                        alt={`${categoryLabels[language][work.category as CakeCategory] ?? work.category} cake`}
                         fill
                         className="object-cover brightness-95 contrast-105"
                         sizes="(min-width: 768px) 33vw, 100vw"
@@ -515,6 +567,7 @@ export default function HomeClient({ initialProducts }: Props) {
             </div>
             <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4">
               <p className="text-sm text-amber-800">{t.showcaseCustomHint}</p>
+              <p className="mt-2 text-xs text-amber-900/80">{t.imageUploadHint}</p>
               <label className="mt-3 inline-flex cursor-pointer rounded-lg bg-[#5C4B43] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#4D3F38]">
                 {uploadingReferenceImage ? t.uploadingReferenceImage : t.uploadReferenceImage}
                 <input
@@ -570,6 +623,7 @@ export default function HomeClient({ initialProducts }: Props) {
                 </div>
                 <div className="rounded-lg border border-[#D8D2C9] bg-[#F4F1EC] p-4">
                   <p>{t.referenceImage}</p>
+                  <p className="mt-1 text-xs text-zinc-500">{t.imageUploadHint}</p>
                   <div className="mt-1 flex flex-wrap items-center gap-2">
                     <label className="inline-flex cursor-pointer rounded-lg border border-[#D8D2C9] bg-white px-3 py-2 text-sm font-semibold text-[#5C4B43] transition hover:bg-[#F4F1EC]">
                       {uploadingReferenceImage ? t.uploadingReferenceImage : t.uploadReferenceImage}
@@ -607,6 +661,7 @@ export default function HomeClient({ initialProducts }: Props) {
                 )}
                 <div className="mt-2 rounded-lg border border-[#D8D2C9] bg-[#F4F1EC] p-4">
                   <p>{t.referenceImage}</p>
+                  <p className="mt-1 text-xs text-zinc-500">{t.imageUploadHint}</p>
                   <div className="mt-1 flex flex-wrap items-center gap-2">
                     <label className="inline-flex cursor-pointer rounded-lg border border-[#D8D2C9] bg-white px-3 py-2 text-sm font-semibold text-[#5C4B43] transition hover:bg-[#F4F1EC]">
                       {uploadingReferenceImage ? t.uploadingReferenceImage : t.uploadReferenceImage}

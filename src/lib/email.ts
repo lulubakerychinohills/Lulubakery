@@ -34,6 +34,7 @@ const categoryMap: Record<string, string> = {
   men: "男士",
   women: "女士",
   kids: "儿童",
+  sweet: "甜品",
   other: "其他",
 };
 

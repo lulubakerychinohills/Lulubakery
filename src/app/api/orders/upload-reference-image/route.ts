@@ -1,11 +1,14 @@
 import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase";
-import { isSupportedImageFile, prepareImageForUpload, resolveImageExtension } from "@/lib/upload-image";
+import {
+  isSupportedImageFile,
+  MAX_IMAGE_UPLOAD_BYTES,
+  prepareImageForUpload,
+  resolveImageExtension,
+} from "@/lib/upload-image";
 
 export const runtime = "nodejs";
-
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX_REQUESTS = 8;
 const ipRequestStore = new Map<string, number[]>();
@@ -61,8 +64,8 @@ export async function POST(request: NextRequest) {
     if (!isSupportedImageFile(file.type, file.name)) {
       return NextResponse.json({ message: "只支持图片文件。" }, { status: 400 });
     }
-    if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json({ message: "图片大小不能超过 5MB。" }, { status: 400 });
+    if (file.size > MAX_IMAGE_UPLOAD_BYTES) {
+      return NextResponse.json({ message: "图片须小于或等于 10MB。" }, { status: 400 });
     }
 
     const ext = resolveImageExtension(file.name, file.type);
