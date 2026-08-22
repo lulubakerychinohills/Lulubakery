@@ -10,6 +10,7 @@ type CakeItem = {
   id: string;
   category: CakeCategory;
   imageUrl?: string;
+  createdAt?: string;
 };
 
 type Notice = {
@@ -60,7 +61,12 @@ export default function AdminPage() {
       const response = await fetch("/api/products", { cache: "no-store" });
       const result = (await response.json()) as { products?: CakeItem[] };
       if (response.ok && Array.isArray(result.products)) {
-        setProducts(result.products);
+        const sorted = [...result.products].sort((a, b) => {
+          const ta = Date.parse(a.createdAt || "") || 0;
+          const tb = Date.parse(b.createdAt || "") || 0;
+          return tb - ta;
+        });
+        setProducts(sorted);
       }
     } catch {
       // ignore load failures in UI
@@ -227,13 +233,21 @@ export default function AdminPage() {
         <section className="rounded-2xl border border-[#D8D2C9] bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between gap-3">
             <h1 className="text-2xl font-semibold">上传产品</h1>
-            <button
-              type="button"
-              onClick={onLogout}
-              className="rounded-lg border border-[#D8D2C9] px-4 py-2 text-sm font-semibold text-[#5C4B43] transition hover:bg-[#F4F1EC]"
-            >
-              退出
-            </button>
+            <div className="flex items-center gap-2">
+              <Link
+                href="/"
+                className="rounded-lg border border-[#D8D2C9] px-4 py-2 text-sm font-semibold text-[#5C4B43] transition hover:bg-[#F4F1EC]"
+              >
+                主页
+              </Link>
+              <button
+                type="button"
+                onClick={onLogout}
+                className="rounded-lg border border-[#D8D2C9] px-4 py-2 text-sm font-semibold text-[#5C4B43] transition hover:bg-[#F4F1EC]"
+              >
+                退出
+              </button>
+            </div>
           </div>
           <p className="mt-2 text-sm text-zinc-600">选分类 → 选图片 → 上传。新产品会排在最前面。</p>
 
@@ -291,6 +305,7 @@ export default function AdminPage() {
 
         <section className="mt-6 rounded-2xl border border-[#D8D2C9] bg-white p-6 shadow-sm">
           <h2 className="text-xl font-semibold">已上传（{products.length}）</h2>
+          <p className="mt-1 text-sm text-zinc-500">按上传时间，最新在上。</p>
           <ul className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5">
             {products.map((item) => (
               <li key={item.id} className="overflow-hidden rounded-lg border border-zinc-200 bg-[#F4F1EC]">

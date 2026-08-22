@@ -14,6 +14,8 @@ export type CakeItem = {
   descriptionI18n: I18nText;
   /** 展示序号，越小越靠前；可与后台列表中修改。 */
   sortOrder: number;
+  /** ISO 时间；后台「已上传」按此倒序，最新在上。 */
+  createdAt: string;
 };
 
 export type NewCakeInput = {
@@ -83,6 +85,7 @@ function mapRowToCakeItem(row: ProductRow): CakeItem {
       es: row.description,
     },
     sortOrder,
+    createdAt: typeof row.created_at === "string" ? row.created_at : "",
   };
 }
 

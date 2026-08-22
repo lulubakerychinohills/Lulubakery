@@ -84,6 +84,9 @@ const routeCategoryMap: Record<string, CategoryFilter> = {
 const sizeOptions: SizeOption[] = ["4", "6", "8", "10", "double", "other"];
 const fillingOptions: FillingOption[] = ["strawberry", "mango", "durian", "oreo", "other"];
 
+const ORDER_PRODUCT_STORAGE_KEY = "lulu-order-product-id";
+const ORDER_REFERENCE_STORAGE_KEY = "lulu-order-reference-image";
+
 const languageLabels: Record<Language, string> = {
   zh: "中文",
   en: "English",
@@ -392,6 +395,36 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
   );
 
   useEffect(() => {
+    if (pathname === "/order") {
+      setActiveTab("order");
+
+      const params = new URLSearchParams(window.location.search);
+      const productId =
+        params.get("product")?.trim() ||
+        (typeof window !== "undefined" ? sessionStorage.getItem(ORDER_PRODUCT_STORAGE_KEY)?.trim() || "" : "");
+
+      if (productId) {
+        const cake = initialProducts.find((item) => item.id === productId);
+        if (cake) {
+          setSelectedCake(cake);
+          setForm((prev) => ({
+            ...prev,
+            productId: cake.id,
+            productCategory: cake.category,
+            productImageUrl: cake.imageUrl || "",
+          }));
+          sessionStorage.setItem(ORDER_PRODUCT_STORAGE_KEY, cake.id);
+        }
+      }
+
+      const referenceImageUrl = sessionStorage.getItem(ORDER_REFERENCE_STORAGE_KEY)?.trim() || "";
+      if (referenceImageUrl) {
+        setForm((prev) => ({ ...prev, referenceImageUrl }));
+        sessionStorage.removeItem(ORDER_REFERENCE_STORAGE_KEY);
+      }
+      return;
+    }
+
     if (pathname === "/sweet/photos") {
       setActiveCategory("sweet");
       setActiveTab("showcase");
@@ -402,7 +435,29 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
       setActiveCategory(category);
       setActiveTab("showcase");
     }
-  }, [pathname]);
+  }, [pathname, initialProducts]);
+
+  const goShowcaseTab = () => {
+    const targetRoute = categoryRouteMap[activeCategory] || "/";
+    if (pathname === targetRoute) {
+      setActiveTab("showcase");
+      return;
+    }
+    router.push(targetRoute);
+  };
+
+  const goOrderTab = () => {
+    const productId = selectedCake?.id || form.productId.trim();
+    const target = productId ? `/order?product=${encodeURIComponent(productId)}` : "/order";
+    if (pathname === "/order") {
+      setActiveTab("order");
+      if (productId && !window.location.search.includes(productId)) {
+        router.replace(target);
+      }
+      return;
+    }
+    router.push(target);
+  };
 
   const goOrder = (cake: CakeItem) => {
     setSelectedCake(cake);
@@ -412,8 +467,9 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
       productCategory: cake.category,
       productImageUrl: cake.imageUrl || "",
     }));
-    setActiveTab("order");
     setMessage("");
+    sessionStorage.setItem(ORDER_PRODUCT_STORAGE_KEY, cake.id);
+    router.push(`/order?product=${encodeURIComponent(cake.id)}`);
   };
 
   const onReferenceImageSelected = async (file: File) => {
@@ -436,7 +492,8 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
         throw new Error(result.message || "图片上传失败。");
       }
       setForm((prev) => ({ ...prev, referenceImageUrl: nextUrl }));
-      setActiveTab("order");
+      sessionStorage.setItem(ORDER_REFERENCE_STORAGE_KEY, nextUrl);
+      router.push("/order");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "图片上传失败。");
     } finally {
@@ -574,7 +631,7 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
         <section className="mt-8 flex flex-wrap items-center gap-3">
           <button
             type="button"
-            onClick={() => setActiveTab("showcase")}
+            onClick={goShowcaseTab}
             className={`rounded-full px-5 py-2 text-sm font-semibold transition ${activeTab === "showcase" ? "bg-[#5C4B43] text-white" : "bg-[#EFEAE4] text-[#5C4B43] hover:bg-[#E6DED4]"
               }`}
           >
@@ -582,7 +639,7 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
           </button>
           <button
             type="button"
-            onClick={() => setActiveTab("order")}
+            onClick={goOrderTab}
             className={`rounded-full px-5 py-2 text-sm font-semibold transition ${activeTab === "order" ? "bg-[#5C4B43] text-white" : "bg-[#EFEAE4] text-[#5C4B43] hover:bg-[#E6DED4]"
               }`}
           >
