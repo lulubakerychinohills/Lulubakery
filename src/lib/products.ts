@@ -52,7 +52,7 @@ function rowCreatedAtMs(row: ProductRow): number {
   return Number.isFinite(t) ? t : 0;
 }
 
-/** 甜品（sweet）整体排在非甜品之后，避免在「全部」里顶在最前；组内再按 sort_order、创建时间。 */
+/** 甜品（sweet）整体排在非甜品之后；组内按上传时间，最新在前。 */
 function categoryAllPageTier(category: CakeCategory): number {
   return category === "sweet" ? 1 : 0;
 }
@@ -63,12 +63,13 @@ function sortProductRows(rows: ProductRow[]): ProductRow[] {
     const tierB = categoryAllPageTier(b.category);
     if (tierA !== tierB) return tierA - tierB;
 
-    const ao = rowSortOrder(a);
-    const bo = rowSortOrder(b);
-    if (ao !== bo) return ao - bo;
     const ta = rowCreatedAtMs(a);
     const tb = rowCreatedAtMs(b);
     if (tb !== ta) return tb - ta;
+
+    const ao = rowSortOrder(a);
+    const bo = rowSortOrder(b);
+    if (ao !== bo) return ao - bo;
     return a.id.localeCompare(b.id);
   });
 }
