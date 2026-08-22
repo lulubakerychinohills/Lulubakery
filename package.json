@@ -9,6 +9,7 @@
     "optimize-public-images": "node scripts/optimize-public-images.mjs"
   },
   "dependencies": {
+    "@paypal/react-paypal-js": "^10.3.0",
     "@supabase/supabase-js": "^2.101.1",
     "next": "16.2.2",
     "nodemailer": "^8.0.4",

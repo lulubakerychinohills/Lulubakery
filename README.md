@@ -50,6 +50,24 @@ SUPABASE_STORAGE_BUCKET=product-images
 - `SUPABASE_STORAGE_BUCKET`：图片桶名称（默认 `product-images`）
 - 如果你用 QQ/163/Gmail，一般需要开启 SMTP 并使用“授权码”而不是登录密码
 
+### PayPal 订金（订购页）
+
+在 `.env.local` / Vercel 增加：
+
+```env
+NEXT_PUBLIC_PAYPAL_CLIENT_ID=your_paypal_client_id
+PAYPAL_CLIENT_SECRET=your_paypal_secret
+PAYPAL_MODE=sandbox
+NEXT_PUBLIC_PAYPAL_CURRENCY=USD
+NEXT_PUBLIC_ORDER_DEPOSIT_USD=50.00
+```
+
+说明：
+
+- 沙盒测试用 `PAYPAL_MODE=sandbox`，上线改为 `live`
+- Client ID / Secret 在 [PayPal Developer Dashboard](https://developer.paypal.com/dashboard/applications) 创建应用后获取
+- `NEXT_PUBLIC_ORDER_DEPOSIT_USD` 为订金金额（美元），定制蛋糕无固定全款标价时先收订金
+
 3. 在 Supabase SQL Editor 执行建表语句（最基础）：
 
 ```sql

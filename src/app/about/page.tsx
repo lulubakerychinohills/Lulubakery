@@ -35,6 +35,8 @@ const copy = {
     locationBody: "Chino Hills",
     contactLabel: "邮箱",
     contactBody: "lulubakerychinohills@gmail.com",
+    wechatLabel: "微信",
+    wechatBody: "Lulucake818",
     cta: "返回首页下单",
     privacyCta: "查看隐私政策",
     menuCta: "甜品价目表",
@@ -60,6 +62,8 @@ const copy = {
     locationBody: "Chino Hills",
     contactLabel: "Email",
     contactBody: "lulubakerychinohills@gmail.com",
+    wechatLabel: "WeChat",
+    wechatBody: "Lulucake818",
     cta: "Back to Home & Order",
     privacyCta: "View Privacy Policy",
     menuCta: "Dessert Menu & Prices",
@@ -85,6 +89,8 @@ const copy = {
     locationBody: "Chino Hills",
     contactLabel: "Correo",
     contactBody: "lulubakerychinohills@gmail.com",
+    wechatLabel: "WeChat",
+    wechatBody: "Lulucake818",
     cta: "Volver al Inicio",
     privacyCta: "Ver Politica de Privacidad",
     menuCta: "Carta de Postres",
@@ -155,6 +161,9 @@ export default function AboutPage() {
               <a href={`mailto:${t.contactBody}`} className="text-[#5C4B43] underline">
                 {t.contactBody}
               </a>
+            </p>
+            <p className="mt-1 text-sm text-zinc-700">
+              <span className="font-semibold">{t.wechatLabel}:</span> {t.wechatBody}
             </p>
           </article>
         </section>

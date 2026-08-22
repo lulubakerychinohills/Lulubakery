@@ -10,6 +10,7 @@ import {
   DESSERT_MENU_PUBLIC_PATH,
 } from "@/lib/menu-image";
 import { MAX_IMAGE_UPLOAD_BYTES } from "@/lib/upload-image";
+import PayPalCheckout from "@/components/paypal-checkout";
 
 type TabKey = "showcase" | "order";
 type Language = "zh" | "en" | "es";
@@ -36,7 +37,10 @@ type OrderForm = {
   customFilling: string;
   notes: string;
   acceptedPolicy: boolean;
+  depositAmount: string;
 };
+
+const defaultDepositAmount = (process.env.NEXT_PUBLIC_ORDER_DEPOSIT_USD || "50.00").trim() || "50.00";
 
 const initialForm: OrderForm = {
   name: "",
@@ -54,6 +58,7 @@ const initialForm: OrderForm = {
   customFilling: "",
   notes: "",
   acceptedPolicy: false,
+  depositAmount: defaultDepositAmount,
 };
 
 export type CakeItem = {
@@ -153,6 +158,7 @@ const copy = {
     tabOrder: "订购",
     aboutLink: "关于我们",
     privacyLink: "隐私政策",
+    wechatQrAlt: "微信二维码：扫码添加 Lulucake818",
     sweetStylesHeading: "甜品作品图",
     sweetMenuHeading: "价目与菜单",
     sweetMenuIntro: "以下为甜品价目与说明；实拍款式请进入作品图页面浏览。",
@@ -164,10 +170,11 @@ const copy = {
     showcaseHint: "先选择分类，再点击具体款式查看订购细节。",
     showcaseCustomHint: "没有看到想要的款式？你可以上传参考图片，我们会按你的想法沟通定制。",
     orderTitle: "在线下单",
-    orderHint: "请填写具体需求，提交后我会通过邮箱收到订单内容。",
+    orderHint: "请填写具体需求，并通过 PayPal 支付订金完成下单。",
     orderStep1: "1. 选择款式或上传参考图",
     orderStep2: "2. 选择尺寸与夹馅",
     orderStep3: "3. 填写联系方式与取货时间",
+    orderStep4: "4. PayPal 支付订金",
     needPick: "你还没有选择具体蛋糕。请先切换到“展示”Tab 选择款式，再回来提交订单。",
     currentCake: "当前订购款式",
     name: "姓名",
@@ -185,15 +192,17 @@ const copy = {
     imageUploadHint: "图片文件须小于或等于 10MB。",
     imageTooLarge: "图片超过 10MB，请压缩后再上传。",
     notes: "备注",
-    submit: "提交订单",
+    submit: "仅提交意向（不付款）",
     submitting: "提交中...",
-    contactRequired: "请填写邮箱，方便联系。",
-    otherSizeRequired: "你选择了其他尺寸，请填写具体尺寸。",
-    otherFillingRequired: "你选择了其他夹馅，请填写具体口味。",
-    pickupRequired: "请填写取货日期和时间。",
-    pickFirst: "请先在展示页选择具体蛋糕，再填写订购信息。",
+    payDeposit: "订金金额（USD）",
+    payHint: "请填写本次订金金额，定制蛋糕先付订金锁定档期，尾款取货时结清。",
+    paying: "正在处理支付…",
+    depositRequired: "请填写订金金额。",
+    depositInvalid: "请填写有效订金金额（至少 1 USD）。",
+    placeholderDeposit: "例如：50.00",
     successDialogTitle: "下单成功",
     successDialogBody: "我们已收到你的订单，会尽快联系你。",
+    successPaidBody: "订金支付成功，我们已收到订单，会尽快联系你确认细节。",
     closeDialog: "我知道了",
     policyConsent: "提交订单即表示你同意我们的《隐私政策》。",
     policyRequired: "请先勾选同意隐私政策。",
@@ -204,6 +213,12 @@ const copy = {
     placeholderOtherSize: "例如：7寸 / 6+10 / 3层",
     placeholderNotes: "例如：希望周六上午送达，写生日祝福语等",
     placeholderOtherFilling: "例如：榴莲 / 红豆 / 奶酪",
+    contactRequired: "请填写邮箱，方便联系。",
+    nameRequired: "请填写姓名。",
+    otherSizeRequired: "你选择了其他尺寸，请填写具体尺寸。",
+    otherFillingRequired: "你选择了其他夹馅，请填写具体口味。",
+    pickupRequired: "请填写取货日期和时间。",
+    pickFirst: "请先在展示页选择具体蛋糕，或上传参考图片。",
   },
   en: {
     brand: "Lulu Bakery",
@@ -215,6 +230,7 @@ const copy = {
     tabOrder: "Order",
     aboutLink: "About Us",
     privacyLink: "Privacy Policy",
+    wechatQrAlt: "WeChat QR code: scan to add Lulucake818",
     sweetStylesHeading: "Dessert photos",
     sweetMenuHeading: "Menu & prices",
     sweetMenuIntro: "Dessert menu and prices below. Use the link for photos of our work.",
@@ -226,10 +242,11 @@ const copy = {
     showcaseHint: "Choose a category first, then open a cake for ordering details.",
     showcaseCustomHint: "If you cannot find the style you want, upload a reference photo for custom discussion.",
     orderTitle: "Place Order",
-    orderHint: "Fill in your requirements. I will receive this order by email.",
+    orderHint: "Fill in your requirements, then pay a deposit with PayPal to place the order.",
     orderStep1: "1. Pick style or upload reference",
     orderStep2: "2. Choose size and filling",
     orderStep3: "3. Leave contact and pickup details",
+    orderStep4: "4. Pay deposit with PayPal",
     needPick: "No cake selected yet. Please pick one in the Showcase tab first.",
     currentCake: "Current Cake",
     name: "Name",
@@ -247,15 +264,23 @@ const copy = {
     imageUploadHint: "Image files must be 10 MB or smaller.",
     imageTooLarge: "This image is over 10 MB. Please compress it and try again.",
     notes: "Notes",
-    submit: "Submit Order",
+    submit: "Submit without payment",
     submitting: "Submitting...",
+    payDeposit: "Deposit amount (USD)",
+    payHint: "Enter your deposit amount to reserve the date. Remaining balance is due at pickup.",
+    paying: "Processing payment…",
+    depositRequired: "Please enter a deposit amount.",
+    depositInvalid: "Please enter a valid deposit (at least $1 USD).",
+    placeholderDeposit: "e.g. 50.00",
     contactRequired: "Please provide your email.",
+    nameRequired: "Please provide your name.",
     otherSizeRequired: "Please enter your custom size.",
     otherFillingRequired: "Please enter your custom filling.",
     pickupRequired: "Please provide pickup date and time.",
-    pickFirst: "Please select a cake from Showcase before ordering.",
+    pickFirst: "Please select a cake from Showcase, or upload a reference photo.",
     successDialogTitle: "Order Submitted",
     successDialogBody: "We received your order and will contact you soon.",
+    successPaidBody: "Deposit paid. We received your order and will contact you soon.",
     closeDialog: "OK",
     policyConsent: "By submitting, you agree to our Privacy Policy.",
     policyRequired: "Please agree to the Privacy Policy before submitting.",
@@ -277,6 +302,7 @@ const copy = {
     tabOrder: "Pedido",
     aboutLink: "Sobre Nosotros",
     privacyLink: "Politica de Privacidad",
+    wechatQrAlt: "Codigo QR de WeChat: escanear para agregar Lulucake818",
     sweetStylesHeading: "Fotos de postres",
     sweetMenuHeading: "Carta y precios",
     sweetMenuIntro: "Menu y precios abajo. El enlace lleva a las fotos.",
@@ -288,10 +314,11 @@ const copy = {
     showcaseHint: "Primero elige una categoria y luego abre un pastel para ver detalles.",
     showcaseCustomHint: "Si no encuentras el estilo que quieres, sube una foto de referencia para personalizar.",
     orderTitle: "Hacer Pedido",
-    orderHint: "Completa tus requisitos. Recibire este pedido por correo.",
+    orderHint: "Completa tus requisitos y paga el deposito con PayPal para confirmar.",
     orderStep1: "1. Elige estilo o sube referencia",
     orderStep2: "2. Elige tamano y relleno",
     orderStep3: "3. Deja contacto y hora de recogida",
+    orderStep4: "4. Paga deposito con PayPal",
     needPick: "Aun no has elegido un pastel. Selecciona uno en la Galeria.",
     currentCake: "Pastel Actual",
     name: "Nombre",
@@ -309,15 +336,23 @@ const copy = {
     imageUploadHint: "La imagen debe pesar como maximo 10 MB.",
     imageTooLarge: "La imagen supera 10 MB. Comprimela y vuelve a intentarlo.",
     notes: "Notas",
-    submit: "Enviar Pedido",
+    submit: "Enviar sin pago",
     submitting: "Enviando...",
+    payDeposit: "Monto del deposito (USD)",
+    payHint: "Ingresa el deposito para reservar la fecha. El resto se paga al recoger.",
+    paying: "Procesando pago…",
+    depositRequired: "Ingresa el monto del deposito.",
+    depositInvalid: "Ingresa un deposito valido (minimo 1 USD).",
+    placeholderDeposit: "ej. 50.00",
     contactRequired: "Por favor completa tu correo.",
+    nameRequired: "Por favor completa tu nombre.",
     otherSizeRequired: "Elegiste otro tamano. Completa el tamano personalizado.",
     otherFillingRequired: "Elegiste otro relleno. Completa el relleno personalizado.",
     pickupRequired: "Completa fecha y hora de recogida.",
-    pickFirst: "Selecciona primero un pastel en la Galeria.",
+    pickFirst: "Selecciona un pastel en la Galeria, o sube una foto de referencia.",
     successDialogTitle: "Pedido enviado",
     successDialogBody: "Recibimos tu pedido y te contactaremos pronto.",
+    successPaidBody: "Deposito pagado. Recibimos tu pedido y te contactaremos pronto.",
     closeDialog: "Entendido",
     policyConsent: "Al enviar, aceptas nuestra Politica de Privacidad.",
     policyRequired: "Debes aceptar la Politica de Privacidad antes de enviar.",
@@ -382,10 +417,45 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
   const [selectedCake, setSelectedCake] = useState<CakeItem | null>(null);
   const [form, setForm] = useState<OrderForm>(initialForm);
   const [submitting, setSubmitting] = useState(false);
+  const [paying, setPaying] = useState(false);
   const [uploadingReferenceImage, setUploadingReferenceImage] = useState(false);
-  const [message, setMessage] = useState("");
+  const [orderMessage, setOrderMessageState] = useState("");
+  const [fieldErrorId, setFieldErrorId] = useState<string | null>(null);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [successPaid, setSuccessPaid] = useState(false);
   const t = copy[language];
+  const depositCurrency = (process.env.NEXT_PUBLIC_PAYPAL_CURRENCY || "USD").trim().toUpperCase() || "USD";
+  const normalizedDeposit = (() => {
+    const cleaned = form.depositAmount.replace(/[$,\s]/g, "");
+    const n = Number.parseFloat(cleaned);
+    return Number.isFinite(n) && n > 0 ? n.toFixed(2) : "";
+  })();
+  // PayPal Smart Buttons UI is always English; keep the amount line English too.
+  const depositLabel = normalizedDeposit
+    ? `Deposit due: $${normalizedDeposit} ${depositCurrency}`
+    : "Deposit amount (USD)";
+  const inputClassName =
+    "mt-1 w-full rounded-lg border border-[#D8D2C9] px-3 py-2 outline-none transition focus:border-[#8B776A]";
+  const fieldClass = (fieldId: string) =>
+    `${inputClassName}${fieldErrorId === fieldId ? " border-rose-500 ring-2 ring-rose-300" : ""}`;
+  const depositInputClass = `min-w-0 flex-1 rounded-lg border border-[#D8D2C9] px-3 py-2 outline-none transition focus:border-[#8B776A]${
+    fieldErrorId === "order-deposit" ? " border-rose-500 ring-2 ring-rose-300" : ""
+  }`;
+  const messageText = typeof orderMessage === "string" ? orderMessage : "";
+
+  const setOrderMessage = (value: unknown) => {
+    if (typeof value === "string") {
+      setOrderMessageState(value);
+      return;
+    }
+    if (value && typeof value === "object" && "message" in value) {
+      const nested = (value as { message: unknown }).message;
+      setOrderMessageState(typeof nested === "string" ? nested : "");
+      return;
+    }
+    setOrderMessageState(value == null || value === false ? "" : String(value));
+  };
+
   const filteredWorks = useMemo(
     () =>
       activeCategory === "all"
@@ -393,6 +463,75 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
         : initialProducts.filter((work) => work.category === activeCategory),
     [activeCategory, initialProducts],
   );
+
+  const focusOrderField = (fieldId: string) => {
+    const el = document.getElementById(fieldId);
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    window.setTimeout(() => {
+      if (
+        el instanceof HTMLInputElement ||
+        el instanceof HTMLTextAreaElement ||
+        el instanceof HTMLSelectElement ||
+        el instanceof HTMLButtonElement
+      ) {
+        el.focus({ preventScroll: true });
+      }
+    }, 250);
+  };
+
+  const validateOrderForm = (): { message: string; fieldId: string } | null => {
+    if (!form.productId.trim() && !form.referenceImageUrl.trim()) {
+      return { message: t.pickFirst, fieldId: "order-style" };
+    }
+    if (!form.name.trim()) {
+      return { message: t.nameRequired, fieldId: "order-name" };
+    }
+    if (!form.email.trim()) {
+      return { message: t.contactRequired, fieldId: "order-email" };
+    }
+    if (form.size === "other" && !form.customSize.trim()) {
+      return { message: t.otherSizeRequired, fieldId: "order-custom-size" };
+    }
+    if (form.filling === "other" && !form.customFilling.trim()) {
+      return { message: t.otherFillingRequired, fieldId: "order-custom-filling" };
+    }
+    if (!form.pickupDate.trim()) {
+      return { message: t.pickupRequired, fieldId: "order-pickup-date" };
+    }
+    if (!form.pickupTime.trim()) {
+      return { message: t.pickupRequired, fieldId: "order-pickup-time" };
+    }
+    if (!form.acceptedPolicy) {
+      return { message: t.policyRequired, fieldId: "order-policy" };
+    }
+    return null;
+  };
+
+  const validateDepositField = (): { message: string; fieldId: string } | null => {
+    const depositRaw = form.depositAmount.trim();
+    if (!depositRaw) {
+      return { message: t.depositRequired, fieldId: "order-deposit" };
+    }
+    const depositNum = Number.parseFloat(depositRaw.replace(/[$,\s]/g, ""));
+    if (!Number.isFinite(depositNum) || depositNum < 1) {
+      return { message: t.depositInvalid, fieldId: "order-deposit" };
+    }
+    return null;
+  };
+
+  /** 校验表单；失败时写提示并定位字段。返回 true 表示通过。 */
+  const runValidation = (requireDeposit = false): boolean => {
+    const result = validateOrderForm() || (requireDeposit ? validateDepositField() : null);
+    if (!result) {
+      setFieldErrorId(null);
+      return true;
+    }
+    setOrderMessage(result.message);
+    setFieldErrorId(result.fieldId);
+    focusOrderField(result.fieldId);
+    return false;
+  };
 
   useEffect(() => {
     if (pathname === "/order") {
@@ -467,15 +606,15 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
       productCategory: cake.category,
       productImageUrl: cake.imageUrl || "",
     }));
-    setMessage("");
+    setOrderMessage("");
     sessionStorage.setItem(ORDER_PRODUCT_STORAGE_KEY, cake.id);
     router.push(`/order?product=${encodeURIComponent(cake.id)}`);
   };
 
   const onReferenceImageSelected = async (file: File) => {
-    setMessage("");
+    setOrderMessage("");
     if (file.size > MAX_IMAGE_UPLOAD_BYTES) {
-      setMessage(t.imageTooLarge);
+      setOrderMessage(t.imageTooLarge);
       return;
     }
     setUploadingReferenceImage(true);
@@ -495,57 +634,38 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
       sessionStorage.setItem(ORDER_REFERENCE_STORAGE_KEY, nextUrl);
       router.push("/order");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "图片上传失败。");
+      setOrderMessage(error instanceof Error ? error.message : "图片上传失败。");
     } finally {
       setUploadingReferenceImage(false);
     }
   };
 
+  const buildSubmitPayload = () => {
+    const cleaned = form.depositAmount.replace(/[$,\s]/g, "");
+    const n = Number.parseFloat(cleaned);
+    const depositAmount = Number.isFinite(n) && n > 0 ? n.toFixed(2) : form.depositAmount.trim();
+    return {
+      ...form,
+      size: form.size === "other" ? form.customSize.trim() : form.size,
+      filling: form.filling === "other" ? form.customFilling.trim() : form.filling,
+      depositAmount,
+    };
+  };
+
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setMessage("");
+    setOrderMessage("");
 
-    if (!form.productId.trim() && !form.referenceImageUrl.trim()) {
-      setMessage(t.pickFirst);
-      return;
-    }
-
-    if (!form.email.trim()) {
-      setMessage(t.contactRequired);
-      return;
-    }
-
-    if (form.size === "other" && !form.customSize.trim()) {
-      setMessage(t.otherSizeRequired);
-      return;
-    }
-
-    if (form.filling === "other" && !form.customFilling.trim()) {
-      setMessage(t.otherFillingRequired);
-      return;
-    }
-
-    if (!form.pickupDate.trim() || !form.pickupTime.trim()) {
-      setMessage(t.pickupRequired);
-      return;
-    }
-
-    if (!form.acceptedPolicy) {
-      setMessage(t.policyRequired);
+    if (!runValidation()) {
       return;
     }
 
     setSubmitting(true);
     try {
-      const submitPayload = {
-        ...form,
-        size: form.size === "other" ? form.customSize.trim() : form.size,
-        filling: form.filling === "other" ? form.customFilling.trim() : form.filling,
-      };
       const response = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(submitPayload),
+        body: JSON.stringify(buildSubmitPayload()),
       });
 
       const result = (await response.json()) as { message?: string };
@@ -553,7 +673,9 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
         throw new Error(result.message || "提交失败，请稍后重试。");
       }
 
-      setMessage("");
+      setOrderMessage("");
+      setFieldErrorId(null);
+      setSuccessPaid(false);
       setShowSuccessDialog(true);
       setForm((prev) => ({
         ...initialForm,
@@ -562,69 +684,86 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
         productImageUrl: prev.productImageUrl,
       }));
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "提交失败，请稍后重试。");
+      setOrderMessage(error instanceof Error ? error.message : "提交失败，请稍后重试。");
     } finally {
       setSubmitting(false);
     }
   };
 
-  const inputClassName =
-    "mt-1 w-full rounded-lg border border-[#D8D2C9] px-3 py-2 outline-none transition focus:border-[#8B776A]";
-
   return (
     <main className="min-h-screen bg-linear-to-b from-[#F8F7F5] via-[#F6F5F2] to-[#F3F1ED] py-10 text-zinc-800">
       <div className="mx-auto max-w-6xl px-6">
-        <section className="rounded-2xl bg-linear-to-r from-[#E7E3DE] via-[#E3DED8] to-[#DED8D0] p-8 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="relative h-12 w-12 overflow-hidden rounded-full border border-[#D8D2C9] bg-white/90" onClick={() => router.push("/")}>
-                <Image src="/brand/avatar.webp" alt="Lulu Bakery avatar" fill className="object-cover" sizes="48px" priority />
+        <section className="overflow-hidden rounded-2xl bg-linear-to-r from-[#E7E3DE] via-[#E3DED8] to-[#DED8D0] shadow-sm">
+          <div className="p-5 sm:p-7">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div
+                  className="relative h-12 w-12 cursor-pointer overflow-hidden rounded-full border border-[#D8D2C9] bg-white/90"
+                  onClick={() => router.push("/")}
+                >
+                  <Image src="/brand/avatar.webp" alt="Lulu Bakery avatar" fill className="object-cover" sizes="48px" priority />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-[#4C403A]">{t.brand}</p>
+                  <p className="text-xs text-[#6A5D56]">{t.location}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-semibold text-[#4C403A]">{t.brand}</p>
-                <p className="text-xs text-[#6A5D56]">{t.location}</p>
+              <div className="flex flex-wrap items-center gap-2">
+                <select
+                  aria-label="Select language"
+                  value={language}
+                  onChange={(event) => setLanguage(event.target.value as Language)}
+                  className="rounded-full border border-[#D8D2C9] bg-white px-4 py-1.5 text-sm font-semibold text-[#4C403A] outline-none transition focus:border-[#8B776A]"
+                >
+                  {(["en", "zh", "es"] as Language[]).map((lang) => (
+                    <option key={lang} value={lang}>
+                      {languageLabels[lang]}
+                    </option>
+                  ))}
+                </select>
+                <Link
+                  href="/about"
+                  className="rounded-full bg-[#5C4B43] px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-[#4D3F38]"
+                >
+                  {t.aboutLink}
+                </Link>
+                <Link
+                  href="/privacy"
+                  className="rounded-full border border-[#D8D2C9] bg-white px-4 py-1.5 text-sm font-semibold text-[#5C4B43] transition hover:bg-[#F4F1EC]"
+                >
+                  {t.privacyLink}
+                </Link>
               </div>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <select
-                aria-label="Select language"
-                value={language}
-                onChange={(event) => setLanguage(event.target.value as Language)}
-                className="rounded-full border border-[#D8D2C9] bg-white px-4 py-1.5 text-sm font-semibold text-[#4C403A] outline-none transition focus:border-[#8B776A]"
-              >
-                {(["en", "zh", "es"] as Language[]).map((lang) => (
-                  <option key={lang} value={lang}>
-                    {languageLabels[lang]}
-                  </option>
-                ))}
-              </select>
-              <Link
-                href="/about"
-                className="rounded-full bg-[#5C4B43] px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-[#4D3F38]"
-              >
-                {t.aboutLink}
-              </Link>
-              <Link
-                href="/privacy"
-                className="rounded-full border border-[#D8D2C9] bg-white px-4 py-1.5 text-sm font-semibold text-[#5C4B43] transition hover:bg-[#F4F1EC]"
-              >
-                {t.privacyLink}
-              </Link>
+
+            <div className="mt-4 flex items-end justify-between gap-3 sm:mt-5 sm:gap-6">
+              <div className="min-w-0 flex-1">
+                <h1 className="text-3xl font-bold tracking-tight text-[#2F2926] sm:text-4xl">{t.title}</h1>
+                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-700 sm:text-base">{t.intro}</p>
+              </div>
+              <div className="relative h-[4.75rem] w-[4.75rem] shrink-0 overflow-hidden rounded-xl border border-[#D8D2C9] bg-white p-1.5 shadow-sm sm:h-32 sm:w-32 sm:p-2">
+                <div className="relative h-full w-full">
+                  <Image
+                    src="/brand/wechat-qr-only.jpg"
+                    alt={t.wechatQrAlt}
+                    fill
+                    className="object-contain"
+                    sizes="(max-width: 640px) 76px, 128px"
+                  />
+                </div>
+              </div>
             </div>
           </div>
-          <h1 className="mt-3 text-3xl font-bold sm:text-4xl">{t.title}</h1>
-          <p className="mt-3 max-w-3xl text-zinc-700">{t.intro}</p>
-          <div className="mt-5 overflow-hidden rounded-xl border border-[#D8D2C9] bg-white/85">
-            <div className="relative h-52 w-full sm:h-64">
-              <Image
-                src="/products/cupcake.webp"
-                alt="Assorted bakery cakes"
-                fill
-                priority
-                className="object-cover"
-                sizes="100vw"
-              />
-            </div>
+
+          <div className="relative aspect-[16/7] w-full min-h-[11rem] sm:min-h-[14rem] md:aspect-[21/8]">
+            <Image
+              src="/products/cupcake.webp"
+              alt="Assorted bakery cakes"
+              fill
+              priority
+              className="object-cover"
+              sizes="100vw"
+            />
           </div>
         </section>
 
@@ -758,7 +897,7 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
           <section className="mt-8 rounded-2xl border border-[#D8D2C9] bg-white/95 p-6 sm:p-8">
             <h2 className="text-2xl font-semibold">{t.orderTitle}</h2>
             <p className="mt-2 text-sm text-zinc-600">{t.orderHint}</p>
-            <div className="mt-4 grid gap-2 sm:grid-cols-3">
+            <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
               <div className="rounded-lg border border-[#D8D2C9] bg-[#F1ECE7] px-3 py-2 text-xs font-semibold text-[#5C4B43]">
                 {t.orderStep1}
               </div>
@@ -768,8 +907,18 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
               <div className="rounded-lg border border-[#D8D2C9] bg-[#F1ECE7] px-3 py-2 text-xs font-semibold text-[#5C4B43]">
                 {t.orderStep3}
               </div>
+              <div className="rounded-lg border border-[#D8D2C9] bg-[#F1ECE7] px-3 py-2 text-xs font-semibold text-[#5C4B43]">
+                {t.orderStep4}
+              </div>
             </div>
-            <div className="mt-4 text-sm font-semibold text-zinc-700">{t.orderStep1}</div>
+            <div id="order-style" className="mt-4 text-sm font-semibold text-zinc-700">
+              {t.orderStep1}
+            </div>
+            {fieldErrorId === "order-style" && messageText ? (
+              <p className="mt-2 rounded-lg border-2 border-rose-400 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-900">
+                {messageText}
+              </p>
+            ) : null}
             {selectedCake ? (
               <div className="mt-2 grid gap-4 lg:grid-cols-2">
                 <div className="rounded-lg border border-[#D8D2C9] bg-[#F4F1EC] p-4 text-sm text-zinc-700">
@@ -902,12 +1051,19 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
                 <label>
                   {t.otherSize}
                   <input
-                    className={inputClassName}
+                    id="order-custom-size"
+                    className={fieldClass("order-custom-size")}
                     value={form.customSize}
-                    onChange={(e) => setForm((prev) => ({ ...prev, customSize: e.target.value }))}
+                    onChange={(e) => {
+                      setFieldErrorId(null);
+                      setForm((prev) => ({ ...prev, customSize: e.target.value }));
+                    }}
                     placeholder={t.placeholderOtherSize}
                     required
                   />
+                  {fieldErrorId === "order-custom-size" && messageText ? (
+                    <span className="mt-1 block text-sm font-semibold text-rose-700">{messageText}</span>
+                  ) : null}
                 </label>
               )}
               <label>
@@ -928,12 +1084,19 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
                 <label>
                   {t.otherFilling}
                   <input
-                    className={inputClassName}
+                    id="order-custom-filling"
+                    className={fieldClass("order-custom-filling")}
                     value={form.customFilling}
-                    onChange={(e) => setForm((prev) => ({ ...prev, customFilling: e.target.value }))}
+                    onChange={(e) => {
+                      setFieldErrorId(null);
+                      setForm((prev) => ({ ...prev, customFilling: e.target.value }));
+                    }}
                     placeholder={t.placeholderOtherFilling}
                     required
                   />
+                  {fieldErrorId === "order-custom-filling" && messageText ? (
+                    <span className="mt-1 block text-sm font-semibold text-rose-700">{messageText}</span>
+                  ) : null}
                 </label>
               )}
 
@@ -941,23 +1104,37 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
               <label>
                 {t.name}
                 <input
-                  className={inputClassName}
+                  id="order-name"
+                  className={fieldClass("order-name")}
                   value={form.name}
-                  onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+                  onChange={(e) => {
+                    setFieldErrorId(null);
+                    setForm((prev) => ({ ...prev, name: e.target.value }));
+                  }}
                   placeholder={t.placeholderName}
                   required
                 />
+                {fieldErrorId === "order-name" && messageText ? (
+                  <span className="mt-1 block text-sm font-semibold text-rose-700">{messageText}</span>
+                ) : null}
               </label>
               <label>
                 {t.email}
                 <input
-                  className={inputClassName}
+                  id="order-email"
+                  className={fieldClass("order-email")}
                   type="email"
                   value={form.email}
-                  onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
+                  onChange={(e) => {
+                    setFieldErrorId(null);
+                    setForm((prev) => ({ ...prev, email: e.target.value }));
+                  }}
                   placeholder={t.placeholderEmail}
                   required
                 />
+                {fieldErrorId === "order-email" && messageText ? (
+                  <span className="mt-1 block text-sm font-semibold text-rose-700">{messageText}</span>
+                ) : null}
               </label>
               <label>
                 {t.phone}
@@ -971,23 +1148,37 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
               <label>
                 {t.pickupDate}
                 <input
-                  className={inputClassName}
+                  id="order-pickup-date"
+                  className={fieldClass("order-pickup-date")}
                   type="date"
                   value={form.pickupDate}
-                  onChange={(e) => setForm((prev) => ({ ...prev, pickupDate: e.target.value }))}
+                  onChange={(e) => {
+                    setFieldErrorId(null);
+                    setForm((prev) => ({ ...prev, pickupDate: e.target.value }));
+                  }}
                   required
                 />
+                {fieldErrorId === "order-pickup-date" && messageText ? (
+                  <span className="mt-1 block text-sm font-semibold text-rose-700">{messageText}</span>
+                ) : null}
               </label>
               <label>
                 {t.pickupTime}
                 <input
-                  className={inputClassName}
+                  id="order-pickup-time"
+                  className={fieldClass("order-pickup-time")}
                   type="time"
                   value={form.pickupTime}
-                  onChange={(e) => setForm((prev) => ({ ...prev, pickupTime: e.target.value }))}
+                  onChange={(e) => {
+                    setFieldErrorId(null);
+                    setForm((prev) => ({ ...prev, pickupTime: e.target.value }));
+                  }}
                   placeholder={t.placeholderPickupTime}
                   required
                 />
+                {fieldErrorId === "order-pickup-time" && messageText ? (
+                  <span className="mt-1 block text-sm font-semibold text-rose-700">{messageText}</span>
+                ) : null}
               </label>
               <label className="sm:col-span-2">
                 {t.notes}
@@ -1001,10 +1192,16 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
               </label>
               <label className="sm:col-span-2 flex items-start gap-2 text-sm text-zinc-700">
                 <input
+                  id="order-policy"
                   type="checkbox"
-                  className="mt-0.5 h-4 w-4 rounded border-[#D8D2C9] text-[#5C4B43] focus:ring-[#8B776A]"
+                  className={`mt-0.5 h-4 w-4 rounded border-[#D8D2C9] text-[#5C4B43] focus:ring-[#8B776A]${
+                    fieldErrorId === "order-policy" ? " ring-2 ring-rose-300" : ""
+                  }`}
                   checked={form.acceptedPolicy}
-                  onChange={(e) => setForm((prev) => ({ ...prev, acceptedPolicy: e.target.checked }))}
+                  onChange={(e) => {
+                    setFieldErrorId(null);
+                    setForm((prev) => ({ ...prev, acceptedPolicy: e.target.checked }));
+                  }}
                   required
                 />
                 <span>
@@ -1012,30 +1209,111 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
                   <Link href="/privacy" className="font-semibold text-[#5C4B43] underline">
                     {t.privacyLink}
                   </Link>
+                  {fieldErrorId === "order-policy" && messageText ? (
+                    <span className="mt-1 block text-sm font-semibold text-rose-700">{messageText}</span>
+                  ) : null}
                 </span>
               </label>
               <div className="sm:col-span-2">
+                <p className="text-sm font-semibold text-zinc-700">{t.orderStep4}</p>
+                <p className="mt-1 text-xs text-zinc-500">{t.payHint}</p>
+                <label className="mt-3 block max-w-md">
+                  {t.payDeposit}
+                  <div className="mt-1 flex items-center gap-2">
+                    <span className="shrink-0 text-sm font-semibold text-[#5C4B43]">$</span>
+                    <input
+                      id="order-deposit"
+                      className={depositInputClass}
+                      type="number"
+                      inputMode="decimal"
+                      min={1}
+                      step="0.01"
+                      value={form.depositAmount}
+                      onChange={(e) => {
+                        setFieldErrorId(null);
+                        setForm((prev) => ({ ...prev, depositAmount: e.target.value }));
+                      }}
+                      placeholder={t.placeholderDeposit}
+                      required
+                    />
+                    <span className="shrink-0 text-sm text-zinc-600">{depositCurrency}</span>
+                  </div>
+                  {fieldErrorId === "order-deposit" && messageText ? (
+                    <span className="mt-1 block text-sm font-semibold text-rose-700">{messageText}</span>
+                  ) : null}
+                </label>
+                <div className="mt-3 w-full min-w-0">
+                  {!showSuccessDialog ? (
+                    <PayPalCheckout
+                      draft={buildSubmitPayload()}
+                      amountLabel={depositLabel}
+                      disabled={submitting || uploadingReferenceImage}
+                      onValidate={() => runValidation(true)}
+                      onPaying={setPaying}
+                      onError={(msg) => {
+                        setOrderMessage(msg);
+                        if (!fieldErrorId) {
+                          const el = document.getElementById("order-form-message");
+                          el?.scrollIntoView({ behavior: "smooth", block: "center" });
+                        }
+                      }}
+                      onSuccess={(info) => {
+                        setOrderMessage("");
+                        setFieldErrorId(null);
+                        setPaying(false);
+                        setSuccessPaid(true);
+                        setShowSuccessDialog(true);
+                        if (info?.emailSent === false && info.emailError) {
+                          setOrderMessage(info.emailError);
+                        }
+                        setForm((prev) => ({
+                          ...initialForm,
+                          productId: prev.productId,
+                          productCategory: prev.productCategory,
+                          productImageUrl: prev.productImageUrl,
+                        }));
+                      }}
+                    />
+                  ) : null}
+                </div>
+                {paying ? <p className="mt-2 text-sm font-semibold text-[#5C4B43]">{t.paying}</p> : null}
+              </div>
+              <div className="sm:col-span-2">
                 <button
                   type="submit"
-                  disabled={submitting}
-                  className="rounded-lg bg-[#5C4B43] px-5 py-2 font-semibold text-white transition hover:bg-[#4D3F38] disabled:cursor-not-allowed disabled:bg-[#B8ADA3]"
+                  disabled={submitting || paying}
+                  className="rounded-lg border border-[#D8D2C9] bg-white px-5 py-2 text-sm font-semibold text-[#5C4B43] transition hover:bg-[#F4F1EC] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {submitting ? t.submitting : t.submit}
                 </button>
-                {message && <p className="mt-3 text-sm text-zinc-700">{message}</p>}
+                {messageText ? (
+                  <p
+                    id="order-form-message"
+                    className="mt-3 rounded-lg border-2 border-rose-400 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-900"
+                  >
+                    {messageText}
+                  </p>
+                ) : null}
               </div>
             </form>
           </section>
         )}
       </div>
-      <div className="mx-auto mt-8 max-w-6xl px-6 text-center text-xs text-zinc-600">
+      <div className="mx-auto mt-8 max-w-6xl px-6 pb-10 text-center text-xs text-zinc-600">
         <Link href="/privacy" className="underline decoration-[#8B776A] underline-offset-2">
           {t.privacyLink}
         </Link>
       </div>
+      {messageText && fieldErrorId ? (
+        <div className="pointer-events-none fixed inset-x-0 top-3 z-50 flex justify-center px-4">
+          <p className="pointer-events-auto max-w-lg rounded-xl border-2 border-rose-400 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-900 shadow-lg">
+            {messageText}
+          </p>
+        </div>
+      ) : null}
       {showSuccessDialog && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+          className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/40 px-4"
           onClick={() => setShowSuccessDialog(false)}
         >
           <div
@@ -1043,7 +1321,7 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
             onClick={(event) => event.stopPropagation()}
           >
             <h3 className="text-lg font-semibold text-zinc-900">{t.successDialogTitle}</h3>
-            <p className="mt-3 text-sm text-zinc-700">{t.successDialogBody}</p>
+            <p className="mt-3 text-sm text-zinc-700">{successPaid ? t.successPaidBody : t.successDialogBody}</p>
             <button
               type="button"
               className="mt-5 rounded-lg bg-[#5C4B43] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#4D3F38]"
