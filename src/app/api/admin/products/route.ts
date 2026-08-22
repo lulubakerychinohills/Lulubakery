@@ -1,7 +1,7 @@
-import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import { ADMIN_COOKIE_NAME, isAdminAuthenticated } from "@/lib/admin-auth";
 import { addProduct, categories, updateProductSortOrder, type CakeCategory } from "@/lib/products";
+import { revalidateProductsCatalog } from "@/lib/revalidate-products";
 
 export const runtime = "nodejs";
 
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     }
 
     const product = await addProduct({ category, imageUrl, description, sortOrder });
-    revalidateTag("products", "max");
+    revalidateProductsCatalog();
     return NextResponse.json({ ok: true, product });
   } catch (error) {
     const rawMessage = error instanceof Error ? error.message : "上传失败。";
@@ -72,7 +72,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const product = await updateProductSortOrder(id, sortOrder);
-    revalidateTag("products", "max");
+    revalidateProductsCatalog();
     return NextResponse.json({ ok: true, product });
   } catch (error) {
     const rawMessage = error instanceof Error ? error.message : "更新失败。";

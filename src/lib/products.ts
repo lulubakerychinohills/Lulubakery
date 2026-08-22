@@ -20,7 +20,7 @@ export type NewCakeInput = {
   category: CakeCategory;
   imageUrl: string;
   description: string;
-  /** 不传则自动取当前最大序号 + 1，排在列表末尾。 */
+  /** 不传则自动取当前最小序号 - 1，排在列表最前。 */
   sortOrder?: number;
 };
 
@@ -86,19 +86,20 @@ function mapRowToCakeItem(row: ProductRow): CakeItem {
   };
 }
 
-async function nextProductSortOrder(supabase: ReturnType<typeof getSupabaseClient>): Promise<number> {
+/** 新上传默认排最前：取当前最小序号减 1。 */
+async function frontProductSortOrder(supabase: ReturnType<typeof getSupabaseClient>): Promise<number> {
   const { data, error } = await supabase
     .from("products")
     .select("sort_order")
-    .order("sort_order", { ascending: false })
+    .order("sort_order", { ascending: true })
     .limit(1)
     .maybeSingle();
 
   if (error) {
     throw new Error(error.message);
   }
-  const max = typeof data?.sort_order === "number" && Number.isFinite(data.sort_order) ? data.sort_order : -1;
-  return max + 1;
+  const min = typeof data?.sort_order === "number" && Number.isFinite(data.sort_order) ? data.sort_order : 1;
+  return min - 1;
 }
 
 async function fetchProductsFromSupabase(): Promise<ProductReadResult> {
@@ -130,7 +131,7 @@ const readProductsCached = unstable_cache(fetchProductsFromSupabase, ["products-
 });
 
 /**
- * 前台页面用：结果带标签 `products`，后台改库后应 `revalidateTag("products")`。
+ * 前台页面用：结果带标签 `products`，后台改库后应调用 `revalidateProductsCatalog()`。
  * 与页面 `revalidate` 配合，减少 TTFB、加快含图路由首屏。
  */
 export async function readProducts(): Promise<ProductReadResult> {
@@ -143,7 +144,7 @@ export async function addProduct(input: NewCakeInput) {
   if (input.sortOrder !== undefined && Number.isFinite(input.sortOrder)) {
     sortOrder = Math.trunc(input.sortOrder);
   } else {
-    sortOrder = await nextProductSortOrder(supabase);
+    sortOrder = await frontProductSortOrder(supabase);
   }
 
   const { data, error } = await supabase

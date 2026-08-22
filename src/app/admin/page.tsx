@@ -10,76 +10,12 @@ type CakeItem = {
   id: string;
   category: CakeCategory;
   imageUrl?: string;
-  sortOrder: number;
 };
 
-function ProductSortEditor({
-  productId,
-  sortOrder,
-  onSaved,
-  onMessage,
-}: {
-  productId: string;
-  sortOrder: number;
-  onSaved: () => void;
-  onMessage: (text: string) => void;
-}) {
-  const [value, setValue] = useState(String(sortOrder));
-  const [busy, setBusy] = useState(false);
-
-  useEffect(() => {
-    setValue(String(sortOrder));
-  }, [productId, sortOrder]);
-
-  const onSave = async () => {
-    const n = Number.parseInt(value, 10);
-    if (!Number.isFinite(n)) {
-      onMessage("请输入有效整数序号。");
-      return;
-    }
-    setBusy(true);
-    onMessage("");
-    try {
-      const response = await fetch("/api/admin/products", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: productId, sortOrder: n }),
-      });
-      const result = (await response.json()) as { message?: string };
-      if (!response.ok) {
-        throw new Error(result.message || "更新序号失败。");
-      }
-      onMessage("序号已更新。");
-      await onSaved();
-    } catch (error) {
-      onMessage(error instanceof Error ? error.message : "更新序号失败。");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  return (
-    <div className="flex flex-wrap items-end gap-2">
-      <label className="text-xs text-zinc-600">
-        展示序号
-        <input
-          type="number"
-          className="ml-1 mt-0.5 block w-24 rounded border border-zinc-300 px-2 py-1 text-sm text-zinc-900"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-        />
-      </label>
-      <button
-        type="button"
-        disabled={busy}
-        onClick={() => void onSave()}
-        className="rounded-lg border border-[#D8D2C9] bg-white px-3 py-1 text-xs font-semibold text-[#5C4B43] transition hover:bg-[#F4F1EC] disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        {busy ? "保存中…" : "保存序号"}
-      </button>
-    </div>
-  );
-}
+type Notice = {
+  kind: "success" | "error";
+  text: string;
+};
 
 const categoryLabels: Record<CakeCategory, string> = {
   men: "男士",
@@ -89,19 +25,34 @@ const categoryLabels: Record<CakeCategory, string> = {
   other: "其他",
 };
 
+function NoticeBanner({ notice }: { notice: Notice }) {
+  const isSuccess = notice.kind === "success";
+  return (
+    <div
+      role="status"
+      className={`mt-4 rounded-xl px-4 py-3 text-base font-semibold ${
+        isSuccess
+          ? "border-2 border-emerald-500 bg-emerald-50 text-emerald-900"
+          : "border-2 border-rose-400 bg-rose-50 text-rose-900"
+      }`}
+    >
+      {isSuccess ? "✓ " : "! "}
+      {notice.text}
+    </div>
+  );
+}
+
 export default function AdminPage() {
   const [checking, setChecking] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
+  const [notice, setNotice] = useState<Notice | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [products, setProducts] = useState<CakeItem[]>([]);
   const [form, setForm] = useState({
     category: "women" as CakeCategory,
     imageUrl: "",
-    description: "",
-    sortOrder: "",
   });
 
   const loadProducts = async () => {
@@ -132,7 +83,7 @@ export default function AdminPage() {
 
   const onLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setMessage("");
+    setNotice(null);
     try {
       const response = await fetch("/api/admin/login", {
         method: "POST",
@@ -145,54 +96,51 @@ export default function AdminPage() {
       }
       setAuthenticated(true);
       setPassword("");
-      setMessage("登录成功。");
+      setNotice({ kind: "success", text: "登录成功，可以上传产品了。" });
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "登录失败。");
+      setNotice({
+        kind: "error",
+        text: error instanceof Error ? error.message : "登录失败。",
+      });
     }
   };
 
   const onLogout = async () => {
     await fetch("/api/admin/logout", { method: "POST" });
     setAuthenticated(false);
-    setMessage("已退出登录。");
+    setNotice({ kind: "success", text: "已退出登录。" });
   };
 
   const onUpload = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setMessage("");
+    if (!form.imageUrl.trim()) {
+      setNotice({ kind: "error", text: "请先选择并上传一张产品图片。" });
+      return;
+    }
+    setNotice(null);
     setSaving(true);
     try {
-      const payload: Record<string, unknown> = {
-        category: form.category,
-        imageUrl: form.imageUrl,
-        description: form.description,
-      };
-      if (form.sortOrder.trim() !== "") {
-        const n = Number.parseInt(form.sortOrder.trim(), 10);
-        if (Number.isFinite(n)) {
-          payload.sortOrder = n;
-        }
-      }
-
       const response = await fetch("/api/admin/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          category: form.category,
+          imageUrl: form.imageUrl,
+          description: "",
+        }),
       });
       const result = (await response.json()) as { message?: string };
       if (!response.ok) {
         throw new Error(result.message || "上传失败。");
       }
-      setMessage("产品上传成功。");
-      setForm({
-        category: form.category,
-        imageUrl: "",
-        description: "",
-        sortOrder: "",
-      });
+      setNotice({ kind: "success", text: "产品上传成功！前台刷新后即可看到。" });
+      setForm({ category: form.category, imageUrl: "" });
       await loadProducts();
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "上传失败。");
+      setNotice({
+        kind: "error",
+        text: error instanceof Error ? error.message : "上传失败。",
+      });
     } finally {
       setSaving(false);
     }
@@ -202,9 +150,9 @@ export default function AdminPage() {
     const selectedFile = event.target.files?.[0];
     if (!selectedFile) return;
 
-    setMessage("");
+    setNotice(null);
     if (selectedFile.size > MAX_IMAGE_UPLOAD_BYTES) {
-      setMessage("图片须小于或等于 10MB，请压缩后重试。");
+      setNotice({ kind: "error", text: "图片须小于或等于 10MB，请压缩后重试。" });
       event.target.value = "";
       return;
     }
@@ -222,20 +170,22 @@ export default function AdminPage() {
         throw new Error(result.message || "图片上传失败。");
       }
 
-      const nextImageUrl = result.url;
-      setForm((prev) => ({ ...prev, imageUrl: nextImageUrl }));
-      setMessage("图片上传成功，已自动填入 URL。");
+      setForm((prev) => ({ ...prev, imageUrl: result.url! }));
+      setNotice({ kind: "success", text: "图片已选好，确认分类后点「上传产品」。" });
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "图片上传失败。");
+      setNotice({
+        kind: "error",
+        text: error instanceof Error ? error.message : "图片上传失败。",
+      });
     } finally {
       setUploadingImage(false);
       event.target.value = "";
     }
   };
 
-  const inputClass = "mt-1 w-full rounded-lg border border-[#D8D2C9] px-3 py-2 outline-none focus:border-[#8B776A]";
+  const inputClass =
+    "mt-1 w-full rounded-lg border border-[#D8D2C9] px-3 py-2 outline-none focus:border-[#8B776A]";
   const previewUrl = form.imageUrl.trim();
-  const canPreview = previewUrl.startsWith("/") || previewUrl.startsWith("http://") || previewUrl.startsWith("https://");
 
   if (checking) {
     return <main className="min-h-screen bg-[#F6F5F2] p-8">正在检查登录状态...</main>;
@@ -246,7 +196,7 @@ export default function AdminPage() {
       <main className="min-h-screen bg-[#F6F5F2] p-6 text-zinc-800 sm:p-10">
         <section className="mx-auto max-w-lg rounded-2xl border border-[#D8D2C9] bg-white p-6 shadow-sm">
           <h1 className="text-2xl font-semibold">产品管理登录</h1>
-          <p className="mt-2 text-sm text-zinc-600">请输入管理密码后上传新产品。</p>
+          <p className="mt-2 text-sm text-zinc-600">输入密码后即可上传产品。</p>
           <form className="mt-5" onSubmit={onLogin}>
             <label>
               管理密码
@@ -265,7 +215,7 @@ export default function AdminPage() {
               登录
             </button>
           </form>
-          {message && <p className="mt-3 text-sm text-zinc-700">{message}</p>}
+          {notice ? <NoticeBanner notice={notice} /> : null}
         </section>
       </main>
     );
@@ -273,24 +223,24 @@ export default function AdminPage() {
 
   return (
     <main className="min-h-screen bg-linear-to-b from-[#F8F7F5] via-[#F6F5F2] to-[#F3F1ED] p-6 text-zinc-800 sm:p-10">
-      <div className="mx-auto max-w-5xl">
+      <div className="mx-auto max-w-3xl">
         <section className="rounded-2xl border border-[#D8D2C9] bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between gap-3">
-            <h1 className="text-2xl font-semibold">产品上传后台</h1>
+            <h1 className="text-2xl font-semibold">上传产品</h1>
             <button
               type="button"
               onClick={onLogout}
               className="rounded-lg border border-[#D8D2C9] px-4 py-2 text-sm font-semibold text-[#5C4B43] transition hover:bg-[#F4F1EC]"
             >
-              退出登录
+              退出
             </button>
           </div>
-          <p className="mt-2 text-sm text-zinc-600">
-            选择分类并上传图片即可。英文描述暂时可选。图片可直接本地选择并上传到 Supabase Storage。展示序号越小越靠前；留空则新商品自动排在末尾。
-          </p>
+          <p className="mt-2 text-sm text-zinc-600">选分类 → 选图片 → 上传。新产品会排在最前面。</p>
 
-          <form className="mt-6 grid gap-4 sm:grid-cols-2" onSubmit={onUpload}>
-            <label className="sm:col-span-2">
+          {notice ? <NoticeBanner notice={notice} /> : null}
+
+          <form className="mt-6 grid gap-4" onSubmit={onUpload}>
+            <label>
               分类
               <select
                 className={inputClass}
@@ -305,127 +255,71 @@ export default function AdminPage() {
               </select>
             </label>
 
-            <label className="sm:col-span-2">
-              图片 URL（可选）
-              <input
-                className={inputClass}
-                value={form.imageUrl}
-                onChange={(e) => setForm((prev) => ({ ...prev, imageUrl: e.target.value }))}
-                placeholder="/products/cupcake.webp"
-              />
-            </label>
-
-            <div className="sm:col-span-2 rounded-lg border border-[#DDD6CE] bg-white p-4">
-              <p className="text-sm font-semibold text-zinc-700">或从本地选择图片</p>
-              <p className="mt-1 text-xs text-zinc-500">支持 jpg / png / webp / gif / heic / heif，单张须小于或等于 10MB。</p>
-              <label className="mt-3 inline-flex cursor-pointer items-center rounded-lg border border-[#D8D2C9] px-4 py-2 text-sm font-semibold text-[#5C4B43] transition hover:bg-[#F4F1EC]">
+            <div className="rounded-lg border border-[#DDD6CE] bg-[#F4F1EC] p-4">
+              <p className="text-sm font-semibold text-zinc-700">产品图片</p>
+              <p className="mt-1 text-xs text-zinc-500">支持拍照或相册，单张 ≤ 10MB。</p>
+              <label className="mt-3 inline-flex cursor-pointer items-center rounded-lg bg-[#5C4B43] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#4D3F38]">
                 <input type="file" accept=".heic,.heif,image/*" className="hidden" onChange={onPickImage} />
-                {uploadingImage ? "上传图片中..." : "选择本地图片"}
+                {uploadingImage ? "上传中..." : previewUrl ? "重新选图" : "选择 / 拍摄图片"}
               </label>
+
+              {previewUrl ? (
+                <div className="relative mt-4 h-48 w-full max-w-xs overflow-hidden rounded-lg border border-[#D8D2C9] bg-white">
+                  <Image
+                    src={previewUrl}
+                    alt="产品预览图"
+                    fill
+                    unoptimized={form.category === "sweet"}
+                    loading="lazy"
+                    decoding="async"
+                    className="object-cover"
+                    sizes="20rem"
+                  />
+                </div>
+              ) : null}
             </div>
 
-            {previewUrl ? (
-              <div className="sm:col-span-2 rounded-lg border border-[#DDD6CE] bg-[#F4F1EC] p-4">
-                <p className="text-sm font-semibold text-zinc-700">图片预览</p>
-                <p className="mt-1 text-xs text-zinc-500">{previewUrl}</p>
-                {canPreview ? (
-                  <div className="relative mt-3 h-40 w-full max-w-xs overflow-hidden rounded-lg border border-[#D8D2C9] bg-white">
-                    <Image
-                      src={previewUrl}
-                      alt="产品预览图"
-                      fill
-                      unoptimized={form.category === "sweet"}
-                      loading="lazy"
-                      decoding="async"
-                      className="object-cover"
-                      sizes="20rem"
-                    />
-                  </div>
-                ) : (
-                  <p className="mt-2 text-xs text-amber-700">
-                    请填写可访问的图片 URL（本地路径或 https 链接）。
-                  </p>
-                )}
-              </div>
-            ) : null}
-
-            <label className="sm:col-span-2">
-              英文描述（English Description，可选）
-              <textarea
-                className={inputClass}
-                rows={3}
-                value={form.description}
-                onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
-              />
-            </label>
-
-            <label className="sm:col-span-2">
-              展示序号（可选）
-              <input
-                className={inputClass}
-                type="number"
-                inputMode="numeric"
-                placeholder="留空 = 自动排在最后"
-                value={form.sortOrder}
-                onChange={(e) => setForm((prev) => ({ ...prev, sortOrder: e.target.value }))}
-              />
-            </label>
-
-            <div className="sm:col-span-2">
-              <button
-                type="submit"
-                disabled={saving}
-                className="rounded-lg bg-[#5C4B43] px-5 py-2 font-semibold text-white transition hover:bg-[#4D3F38] disabled:cursor-not-allowed disabled:bg-[#B8ADA3]"
-              >
-                {saving ? "上传中..." : "上传产品"}
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={saving || uploadingImage || !previewUrl}
+              className="rounded-lg bg-[#5C4B43] px-5 py-3 text-base font-semibold text-white transition hover:bg-[#4D3F38] disabled:cursor-not-allowed disabled:bg-[#B8ADA3]"
+            >
+              {saving ? "上传中..." : "上传产品"}
+            </button>
           </form>
-
-          {message && <p className="mt-3 text-sm text-zinc-700">{message}</p>}
         </section>
 
         <section className="mt-6 rounded-2xl border border-[#D8D2C9] bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-semibold">当前产品列表</h2>
-          <ul className="mt-4 space-y-2 text-sm text-zinc-700">
+          <h2 className="text-xl font-semibold">已上传（{products.length}）</h2>
+          <ul className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5">
             {products.map((item) => (
-              <li key={item.id} className="flex flex-col gap-2 rounded-lg border border-zinc-200 px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-3">
+              <li key={item.id} className="overflow-hidden rounded-lg border border-zinc-200 bg-[#F4F1EC]">
+                <div className="relative aspect-square">
                   {item.imageUrl ? (
-                    <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md border border-[#DDD6CE] bg-[#F4F1EC]">
-                      <Image
-                        src={item.imageUrl}
-                        alt="产品图片"
-                        fill
-                        unoptimized={item.category === "sweet"}
-                        loading="lazy"
-                        decoding="async"
-                        className="object-cover"
-                        sizes="3rem"
-                      />
-                    </div>
-                  ) : (
-                    <div className="h-12 w-12 shrink-0 rounded-md border border-zinc-200 bg-zinc-50" />
-                  )}
-                  <div>
-                    <p>
-                      [{categoryLabels[item.category]}] 序号 {item.sortOrder} · ID: {item.id.slice(0, 8)}
-                    </p>
-                    {item.imageUrl ? <p className="text-xs text-zinc-500">{item.imageUrl}</p> : null}
-                  </div>
+                    <Image
+                      src={item.imageUrl}
+                      alt={categoryLabels[item.category]}
+                      fill
+                      unoptimized={item.category === "sweet"}
+                      loading="lazy"
+                      decoding="async"
+                      className="object-cover"
+                      sizes="120px"
+                    />
+                  ) : null}
                 </div>
-                <ProductSortEditor
-                  productId={item.id}
-                  sortOrder={item.sortOrder}
-                  onSaved={loadProducts}
-                  onMessage={setMessage}
-                />
+                <p className="px-2 py-1 text-center text-xs text-zinc-600">{categoryLabels[item.category]}</p>
               </li>
             ))}
           </ul>
         </section>
+
+        <p className="mt-6 text-center text-sm">
+          <Link href="/" className="text-[#5C4B43] underline-offset-2 hover:underline">
+            返回首页
+          </Link>
+        </p>
       </div>
-      <Link href="/">Back to Home</Link>
     </main>
   );
 }
