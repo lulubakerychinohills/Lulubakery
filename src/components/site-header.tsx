@@ -72,8 +72,8 @@ export default function SiteHeader({
   ] as const;
 
   return (
-    <div className="mb-6">
-      <header className="site-header sticky top-0 z-40 -mx-6 border-b border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_92%,transparent)] px-6 py-3 backdrop-blur-md print:static print:border-0 print:bg-white">
+    <>
+      <header className="site-header sticky top-0 z-40 -mx-6 mb-6 border-b border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_92%,transparent)] px-6 py-3 backdrop-blur-md print:static print:border-0 print:bg-white">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Link href="/" className="flex items-center gap-3 rounded-lg focus-ring">
             <span className="relative h-11 w-11 overflow-hidden rounded-full border border-[var(--color-border)] bg-white/90">
@@ -141,6 +141,6 @@ export default function SiteHeader({
           {children}
         </section>
       ) : null}
-    </div>
+    </>
   );
 }
