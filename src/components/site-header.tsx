@@ -98,9 +98,7 @@ export default function SiteHeader({
               <ul className="flex flex-wrap items-center gap-1 sm:gap-2">
                 {links.map((link) => {
                   const active =
-                    link.href === "/"
-                      ? pathname === "/"
-                      : pathname === link.href || pathname.startsWith(`${link.href}/`);
+                    pathname === link.href || pathname.startsWith(`${link.href}/`);
                   return (
                     <li key={link.href}>
                       <Link
