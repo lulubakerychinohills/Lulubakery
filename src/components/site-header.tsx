@@ -66,7 +66,6 @@ export default function SiteHeader({
   const pathname = usePathname();
   const t = navCopy[language];
   const links = [
-    { href: "/", label: t.home },
     { href: "/about", label: t.about },
     { href: "/order", label: t.order },
     { href: "/privacy", label: t.privacy },

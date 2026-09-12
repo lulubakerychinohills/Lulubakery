@@ -388,18 +388,28 @@ function WorkShowcaseCard({
     work.descriptionI18n[language]?.trim() ||
     work.descriptionI18n.en?.trim() ||
     `${categoryLabels[language][work.category as CakeCategory] ?? work.category} cake`;
+  const categoryLabel = categoryLabels[language][work.category as CakeCategory] ?? work.category;
+  const imageAlt =
+    language === "zh"
+      ? `${categoryLabel}蛋糕照片：${title}（${work.id.slice(0, 8)}）`
+      : language === "es"
+        ? `Foto de pastel ${categoryLabel}: ${title} (${work.id.slice(0, 8)})`
+        : `${categoryLabel} cake photo: ${title} (${work.id.slice(0, 8)})`;
 
   return (
     <button
       type="button"
       className="rounded-xl border border-[#DDD6CE] bg-white p-4 text-left shadow-sm transition hover:border-[#CDBFAF] hover:shadow-md focus-ring"
       onClick={() => onSelect(work)}
+      aria-label={
+        language === "zh" ? `订购：${title}` : language === "es" ? `Pedir: ${title}` : `Order: ${title}`
+      }
     >
       {work.imageUrl ? (
         <div className="relative aspect-square overflow-hidden rounded-lg">
           <Image
             src={work.imageUrl}
-            alt={title}
+            alt={imageAlt}
             fill
             unoptimized={work.category === "sweet"}
             loading="lazy"
@@ -413,7 +423,7 @@ function WorkShowcaseCard({
         <div className="aspect-square rounded-lg bg-linear-to-br from-[#EEEAE4] to-[#E8E2D9]" aria-hidden="true" />
       )}
       <p className="mt-3 line-clamp-2 text-sm font-semibold text-[#4C403A]">{title}</p>
-      <p className="mt-1 text-xs text-[#6A5D56]">{categoryLabels[language][work.category as CakeCategory]}</p>
+      <p className="mt-1 text-xs text-[#6A5D56]">{categoryLabel}</p>
     </button>
   );
 }
