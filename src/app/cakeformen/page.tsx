@@ -15,5 +15,5 @@ export const metadata: Metadata = {
 
 export default async function CakeForMenPage() {
   const result = await readProducts();
-  return <HomeClient initialProducts={result.products} initialCategory="men" initialTab="showcase" />;
+  return <HomeClient initialProducts={result.products} initialCategory="men" />;
 }

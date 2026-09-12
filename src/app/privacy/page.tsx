@@ -1,17 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import Breadcrumbs from "@/components/breadcrumbs";
+import SiteFooter from "@/components/site-footer";
+import SiteHeader, { type SiteLanguage } from "@/components/site-header";
 
-type Language = "zh" | "en" | "es";
-
-const languageLabels: Record<Language, string> = {
-  zh: "中文",
-  en: "English",
-  es: "Espanol",
-};
+type Language = SiteLanguage;
 
 const copy = {
   zh: {
@@ -41,6 +36,8 @@ const copy = {
     contactBody: "lulubakerychinohills@gmail.com",
     backHome: "返回首页",
     aboutLink: "关于我们",
+    homeCrumb: "首页",
+    privacyCrumb: "隐私政策",
   },
   en: {
     title: "Privacy Policy",
@@ -69,6 +66,8 @@ const copy = {
     contactBody: "lulubakerychinohills@gmail.com",
     backHome: "Back to Home",
     aboutLink: "About Us",
+    homeCrumb: "Home",
+    privacyCrumb: "Privacy",
   },
   es: {
     title: "Politica de Privacidad",
@@ -97,71 +96,55 @@ const copy = {
     contactBody: "lulubakerychinohills@gmail.com",
     backHome: "Volver al Inicio",
     aboutLink: "Sobre Nosotros",
+    homeCrumb: "Inicio",
+    privacyCrumb: "Privacidad",
   },
 } as const;
 
 export default function PrivacyPage() {
   const [language, setLanguage] = useState<Language>("en");
   const t = copy[language];
-  const router = useRouter();
   return (
-    <main className="min-h-screen bg-linear-to-b from-[#F8F7F5] via-[#F6F5F2] to-[#F3F1ED] py-10 text-zinc-800">
-      <div className="mx-auto max-w-4xl px-6">
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="min-h-screen bg-linear-to-b from-[#F8F7F5] via-[#F6F5F2] to-[#F3F1ED] py-6 text-zinc-800 outline-none sm:py-10"
+    >
+      <div className="mx-auto max-w-6xl px-6">
+        <SiteHeader language={language} onLanguageChange={setLanguage} />
+        <Breadcrumbs items={[{ href: "/", label: t.homeCrumb }, { label: t.privacyCrumb }]} />
         <section className="rounded-2xl bg-linear-to-r from-[#E7E3DE] via-[#E3DED8] to-[#DED8D0] p-8 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="relative h-12 w-12 overflow-hidden rounded-full border border-[#D8D2C9] bg-white/90" onClick={() => router.push("/")}>
-                <Image src="/brand/avatar.webp" alt="Lulu Bakery avatar" fill className="object-cover" sizes="48px" priority />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-[#4C403A]">Lulu Bakery</p>
-                <p className="text-xs text-[#6A5D56]">Chino Hills</p>
-              </div>
-            </div>
-            <select
-              aria-label="Select language"
-              value={language}
-              onChange={(event) => setLanguage(event.target.value as Language)}
-              className="rounded-full border border-[#D8D2C9] bg-white px-4 py-1.5 text-sm font-semibold text-[#4C403A] outline-none transition focus:border-[#8B776A]"
-            >
-              {(["en", "zh", "es"] as Language[]).map((lang) => (
-                <option key={lang} value={lang}>
-                  {languageLabels[lang]}
-                </option>
-              ))}
-            </select>
-          </div>
-          <h1 className="mt-4 text-3xl font-bold sm:text-4xl">{t.title}</h1>
+          <h1 className="text-3xl font-bold sm:text-4xl">{t.title}</h1>
           <p className="mt-2 text-sm font-semibold text-[#5E524B]">{t.effectiveDate}</p>
           <p className="mt-4 max-w-3xl text-zinc-700">{t.intro}</p>
         </section>
 
         <section className="mt-8 grid gap-4">
-          <article className="rounded-xl border border-[#D8D2C9] bg-white p-5 shadow-sm">
+          <article className="ui-card rounded-xl border border-[#D8D2C9] bg-white p-5 shadow-sm">
             <h2 className="text-lg font-semibold">{t.collectTitle}</h2>
             <p className="mt-2 text-sm text-zinc-700">{t.collectBody}</p>
           </article>
-          <article className="rounded-xl border border-[#D8D2C9] bg-white p-5 shadow-sm">
+          <article className="ui-card rounded-xl border border-[#D8D2C9] bg-white p-5 shadow-sm">
             <h2 className="text-lg font-semibold">{t.useTitle}</h2>
             <p className="mt-2 text-sm text-zinc-700">{t.useBody}</p>
           </article>
-          <article className="rounded-xl border border-[#D8D2C9] bg-white p-5 shadow-sm">
+          <article className="ui-card rounded-xl border border-[#D8D2C9] bg-white p-5 shadow-sm">
             <h2 className="text-lg font-semibold">{t.cookiesTitle}</h2>
             <p className="mt-2 text-sm text-zinc-700">{t.cookiesBody}</p>
           </article>
-          <article className="rounded-xl border border-[#D8D2C9] bg-white p-5 shadow-sm">
+          <article className="ui-card rounded-xl border border-[#D8D2C9] bg-white p-5 shadow-sm">
             <h2 className="text-lg font-semibold">{t.storageTitle}</h2>
             <p className="mt-2 text-sm text-zinc-700">{t.storageBody}</p>
           </article>
-          <article className="rounded-xl border border-[#D8D2C9] bg-white p-5 shadow-sm">
+          <article className="ui-card rounded-xl border border-[#D8D2C9] bg-white p-5 shadow-sm">
             <h2 className="text-lg font-semibold">{t.retentionTitle}</h2>
             <p className="mt-2 text-sm text-zinc-700">{t.retentionBody}</p>
           </article>
-          <article className="rounded-xl border border-[#D8D2C9] bg-white p-5 shadow-sm">
+          <article className="ui-card rounded-xl border border-[#D8D2C9] bg-white p-5 shadow-sm">
             <h2 className="text-lg font-semibold">{t.rightsTitle}</h2>
             <p className="mt-2 text-sm text-zinc-700">{t.rightsBody}</p>
           </article>
-          <article className="rounded-xl border border-[#D8D2C9] bg-white p-5 shadow-sm">
+          <article className="ui-card rounded-xl border border-[#D8D2C9] bg-white p-5 shadow-sm">
             <h2 className="text-lg font-semibold">{t.contactTitle}</h2>
             <a href={`mailto:${t.contactBody}`} className="mt-2 inline-block text-sm text-[#5C4B43] underline">
               {t.contactBody}
@@ -172,18 +155,19 @@ export default function PrivacyPage() {
         <div className="mt-8 flex flex-wrap gap-3">
           <Link
             href="/"
-            className="inline-flex rounded-full bg-[#5C4B43] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#4D3F38]"
+            className="ui-button inline-flex rounded-full bg-[#5C4B43] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#4D3F38] focus-ring"
           >
             {t.backHome}
           </Link>
           <Link
             href="/about"
-            className="inline-flex rounded-full border border-[#D8D2C9] bg-white px-5 py-2 text-sm font-semibold text-[#5C4B43] transition hover:bg-[#F4F1EC]"
+            className="ui-button inline-flex rounded-full border border-[#D8D2C9] bg-white px-5 py-2 text-sm font-semibold text-[#5C4B43] transition hover:bg-[#F4F1EC] focus-ring"
           >
             {t.aboutLink}
           </Link>
         </div>
       </div>
+      <SiteFooter language={language} />
     </main>
   );
 }

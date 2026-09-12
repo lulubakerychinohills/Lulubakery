@@ -7,7 +7,16 @@ import {
   MAX_IMAGE_UPLOAD_BYTES,
   resolveImageExtension,
 } from "@/lib/upload-image";
-import { prepareImageForUpload } from "@/lib/prepare-image-upload";
+import { maxUploadEdgeForProductCategory, prepareImageForUpload } from "@/lib/prepare-image-upload";
+
+const PRODUCT_CATEGORIES = ["men", "women", "kids", "sweet", "other"] as const;
+
+function parseProductCategory(raw: unknown): (typeof PRODUCT_CATEGORIES)[number] {
+  if (typeof raw === "string" && (PRODUCT_CATEGORIES as readonly string[]).includes(raw)) {
+    return raw as (typeof PRODUCT_CATEGORIES)[number];
+  }
+  return "men";
+}
 
 export const runtime = "nodejs";
 
@@ -37,7 +46,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "仅支持 jpg / png / webp / gif / heic / heif。" }, { status: 400 });
     }
 
-    const prepared = await prepareImageForUpload(file, ext);
+    const category = parseProductCategory(formData.get("category"));
+    const maxEdgePx = maxUploadEdgeForProductCategory(category);
+    const prepared = await prepareImageForUpload(file, ext, { maxEdgePx });
     const bucket = process.env.SUPABASE_STORAGE_BUCKET || "product-images";
     const fileName = `${Date.now()}-${randomUUID().slice(0, 8)}${prepared.ext}`;
     const storagePath = `products/${fileName}`;

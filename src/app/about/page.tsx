@@ -1,17 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import Breadcrumbs from "@/components/breadcrumbs";
+import SiteFooter from "@/components/site-footer";
+import SiteHeader, { type SiteLanguage } from "@/components/site-header";
 
-type Language = "zh" | "en" | "es";
-
-const languageLabels: Record<Language, string> = {
-  zh: "中文",
-  en: "English",
-  es: "Espanol",
-};
+type Language = SiteLanguage;
 
 const copy = {
   zh: {
@@ -40,6 +35,8 @@ const copy = {
     cta: "返回首页下单",
     privacyCta: "查看隐私政策",
     menuCta: "甜品价目表",
+    homeCrumb: "首页",
+    aboutCrumb: "关于我们",
   },
   en: {
     title: "About Lulu Bakery",
@@ -67,6 +64,8 @@ const copy = {
     cta: "Back to Home & Order",
     privacyCta: "View Privacy Policy",
     menuCta: "Dessert Menu & Prices",
+    homeCrumb: "Home",
+    aboutCrumb: "About",
   },
   es: {
     title: "Sobre Lulu Bakery",
@@ -94,64 +93,47 @@ const copy = {
     cta: "Volver al Inicio",
     privacyCta: "Ver Politica de Privacidad",
     menuCta: "Carta de Postres",
+    homeCrumb: "Inicio",
+    aboutCrumb: "Sobre Nosotros",
   },
 } as const;
 
 export default function AboutPage() {
   const [language, setLanguage] = useState<Language>("en");
   const t = copy[language];
-  const router = useRouter();
   return (
-    <main className="min-h-screen bg-linear-to-b from-[#F8F7F5] via-[#F6F5F2] to-[#F3F1ED] py-10 text-zinc-800">
-      <div className="mx-auto max-w-4xl px-6">
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="min-h-screen bg-linear-to-b from-[#F8F7F5] via-[#F6F5F2] to-[#F3F1ED] py-6 text-zinc-800 outline-none sm:py-10"
+    >
+      <div className="mx-auto max-w-6xl px-6">
+        <SiteHeader language={language} onLanguageChange={setLanguage} />
+        <Breadcrumbs items={[{ href: "/", label: t.homeCrumb }, { label: t.aboutCrumb }]} />
         <section className="rounded-2xl bg-linear-to-r from-[#E7E3DE] via-[#E3DED8] to-[#DED8D0] p-8 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="relative h-12 w-12 overflow-hidden rounded-full border border-[#D8D2C9] bg-white/90" onClick={() => router.push("/")}>
-                <Image src="/brand/avatar.webp" alt="Lulu Bakery avatar" fill className="object-cover" sizes="48px" priority />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-[#4C403A]">Lulu Bakery</p>
-                <p className="text-xs text-[#6A5D56]">Chino Hills</p>
-              </div>
-            </div>
-            <select
-              aria-label="Select language"
-              value={language}
-              onChange={(event) => setLanguage(event.target.value as Language)}
-              className="rounded-full border border-[#D8D2C9] bg-white px-4 py-1.5 text-sm font-semibold text-[#4C403A] outline-none transition focus:border-[#8B776A]"
-            >
-              {(["en", "zh", "es"] as Language[]).map((lang) => (
-                <option key={lang} value={lang}>
-                  {languageLabels[lang]}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <h1 className="mt-4 text-3xl font-bold sm:text-4xl">{t.title}</h1>
+          <h1 className="text-3xl font-bold sm:text-4xl">{t.title}</h1>
           <p className="mt-2 text-sm font-semibold text-[#5E524B]">{t.subtitle}</p>
           <p className="mt-4 max-w-3xl text-zinc-700">{t.intro}</p>
         </section>
 
         <section className="mt-8 grid gap-4">
-          <article className="rounded-xl border border-[#D8D2C9] bg-white p-5 shadow-sm">
+          <article className="ui-card rounded-xl border border-[#D8D2C9] bg-white p-5 shadow-sm">
             <h2 className="text-lg font-semibold">{t.licensedTitle}</h2>
             <p className="mt-2 text-sm text-zinc-700">{t.licensedBody}</p>
           </article>
-          <article className="rounded-xl border border-[#D8D2C9] bg-white p-5 shadow-sm">
+          <article className="ui-card rounded-xl border border-[#D8D2C9] bg-white p-5 shadow-sm">
             <h2 className="text-lg font-semibold">{t.ingredientsTitle}</h2>
             <p className="mt-2 text-sm text-zinc-700">{t.ingredientsBody}</p>
           </article>
-          <article className="rounded-xl border border-[#D8D2C9] bg-white p-5 shadow-sm">
+          <article className="ui-card rounded-xl border border-[#D8D2C9] bg-white p-5 shadow-sm">
             <h2 className="text-lg font-semibold">{t.occasionsTitle}</h2>
             <p className="mt-2 text-sm text-zinc-700">{t.occasionsBody}</p>
           </article>
-          <article className="rounded-xl border border-[#D8D2C9] bg-white p-5 shadow-sm">
+          <article className="ui-card rounded-xl border border-[#D8D2C9] bg-white p-5 shadow-sm">
             <h2 className="text-lg font-semibold">{t.pickupTitle}</h2>
             <p className="mt-2 text-sm text-zinc-700">{t.pickupBody}</p>
           </article>
-          <article className="rounded-xl border border-[#D8D2C9] bg-white p-5 shadow-sm">
+          <article className="ui-card rounded-xl border border-[#D8D2C9] bg-white p-5 shadow-sm">
             <h2 className="text-lg font-semibold">{t.locationContactTitle}</h2>
             <p className="mt-2 text-sm text-zinc-700">
               <span className="font-semibold">{t.locationLabel}:</span> {t.locationBody}
@@ -171,24 +153,25 @@ export default function AboutPage() {
         <div className="mt-8 flex flex-wrap gap-3">
           <Link
             href="/"
-            className="inline-flex rounded-full bg-[#5C4B43] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#4D3F38]"
+            className="ui-button inline-flex rounded-full bg-[#5C4B43] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#4D3F38] focus-ring"
           >
             {t.cta}
           </Link>
           <Link
             href="/privacy"
-            className="inline-flex rounded-full border border-[#D8D2C9] bg-white px-5 py-2 text-sm font-semibold text-[#5C4B43] transition hover:bg-[#F4F1EC]"
+            className="ui-button inline-flex rounded-full border border-[#D8D2C9] bg-white px-5 py-2 text-sm font-semibold text-[#5C4B43] transition hover:bg-[#F4F1EC] focus-ring"
           >
             {t.privacyCta}
           </Link>
           <Link
             href="/sweet"
-            className="inline-flex rounded-full border border-[#D8D2C9] bg-white px-5 py-2 text-sm font-semibold text-[#5C4B43] transition hover:bg-[#F4F1EC]"
+            className="ui-button inline-flex rounded-full border border-[#D8D2C9] bg-white px-5 py-2 text-sm font-semibold text-[#5C4B43] transition hover:bg-[#F4F1EC] focus-ring"
           >
             {t.menuCta}
           </Link>
         </div>
       </div>
+      <SiteFooter language={language} />
     </main>
   );
 }

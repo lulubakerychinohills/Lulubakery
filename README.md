@@ -116,7 +116,8 @@ alter table public.products disable row level security;
 
 ## 4) 主要代码位置
 
-- 页面与下单表单：`src/app/page.tsx`
+- 页面与下单表单：`src/app/page.tsx` + `src/components/home-client.tsx`
+- 共享导航 / 面包屑 / Skip link：`src/components/site-header.tsx`、`breadcrumbs.tsx`、`skip-link.tsx`
 - 后台管理页：`src/app/admin/page.tsx`
 - 下单 API：`src/app/api/orders/route.ts`
 - 产品 API：`src/app/api/products/route.ts`
@@ -124,10 +125,55 @@ alter table public.products disable row level security;
 - 后台图片上传 API：`src/app/api/admin/upload-image/route.ts`
 - 邮件发送逻辑：`src/lib/email.ts`
 - 产品存储逻辑：`src/lib/products.ts`
+- 搜索过滤：`src/lib/product-search.ts`
 
-## 5) 可继续扩展
+## 5) 测试与课设文档
 
-- 增加作品图片上传和管理（连接 CMS 或对象存储）
-- 订单数据入库（MySQL / PostgreSQL）
-- 后台管理页查看订单
+```bash
+npm test          # unit + a11y smoke（多套件合计 ≥5 条）
+npm run test:a11y # axe-core smoke
+npm run build     # 生产构建
+npm start         # 本地预览生产构建（需先 build）
+```
+
+### 功能概览（Features）
+
+- 多页展示：首页、分类目录、甜品菜单/作品图、关于、隐私、订购
+- 无障碍：Skip link、语义导航、sticky header、面包屑、`:focus-visible`、print CSS
+- 交互：防抖搜索/分类过滤、订单表单校验、成功弹层、PayPal 订金
+- 后台：`/admin` 上传产品到 Supabase
+- SEO：`/sitemap.xml`、`/robots.txt`
+
+### 部署（Deploy）
+
+1. 推送到 GitHub；Vercel 连接仓库自动部署。  
+2. 在 Vercel Production 配置与 `.env.local` 对应的环境变量（含 `NEXT_PUBLIC_SITE_URL`、PayPal Live 等）。  
+3. 改 `NEXT_PUBLIC_*` 后必须 Redeploy。  
+4. 细节见 `DEPLOY_CHECKLIST.md`（若存在）。
+
+### 课设文档
+
+- Design dossier（导出 PDF）：`docs/design-dossier.md`
+- Accessibility / POUR 报告：`docs/accessibility-report.md`
+- 技术说明：`docs/technical-notes.md`
+- **提交差距清单**：`docs/course-submission-checklist.md`
+- 演示讲稿：`docs/presentation-outline.md`
+- PPT：`docs/Lulu-Bakery-Final-Presentation.pptx`
+
+无障碍要点：Skip link、语义 `<nav>` / `<footer>`、sticky header、面包屑、防抖搜索、表单校验、成功弹层 ARIA、`:focus-visible`、print CSS。
+
+提交前请在线上 URL 跑一遍 Lighthouse + WAVE，把截图贴进 `docs/accessibility-report.md` 或设计 PDF。
+
+## 6) 已知限制（Limitations）
+
+- `html[lang]` 未随语言选择器实时切换（页面文案会切换）。
+- 成功弹层有 Esc 关闭与初始焦点；完整 Tab 焦点陷阱可再加强。
+- Next.js Image runtime optimizer 在部分托管环境关闭（`unoptimized`）；产品图靠 Sharp 上传压缩 + WebP 静态资源。
+- Admin 页面不纳入公开无障碍审计范围。
+
+## 7) 可继续扩展
+
+- 订单数据后台列表与状态流转
 - 自动回复客人确认邮件
+- 将 `html[lang]` 与语言选择器同步
+- 产品详情 lightbox

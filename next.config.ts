@@ -10,9 +10,8 @@ const nextConfig: NextConfig = {
     return [{ source: "/menu", destination: "/sweet", permanent: true }];
   },
   images: {
-    // 默认走图片优化；甜品作品图在组件上单独设 unoptimized 保留原图。
-    // 若 Supabase 外链触发 402，可改回 unoptimized: true 并改为上传缩略图字段。
-    unoptimized: false,
+    // Vercel 图片优化对当前套餐返回 402 时须关闭；非甜品靠上传时缩小尺寸（见 prepare-image-upload）。
+    unoptimized: true,
     remotePatterns: [
       { protocol: "https", hostname: "*.supabase.co", pathname: "/**" },
       { protocol: "https", hostname: "images.unsplash.com", pathname: "/**" },

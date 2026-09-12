@@ -166,6 +166,7 @@ export default function AdminPage() {
     try {
       const payload = new FormData();
       payload.append("image", selectedFile);
+      payload.append("category", form.category);
 
       const response = await fetch("/api/admin/upload-image", {
         method: "POST",

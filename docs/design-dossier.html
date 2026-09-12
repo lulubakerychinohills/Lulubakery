@@ -1,0 +1,79 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/><title>Design Dossier — Lulu Bakery</title>
+<style>
+  @page { margin: 18mm; }
+  body { font-family: Georgia, serif; line-height: 1.45; color: #2f2926; max-width: 800px; margin: 0 auto; padding: 24px; }
+  h1,h2,h3 { font-family: system-ui, sans-serif; color: #5c4b43; }
+  h1 { font-size: 1.6rem; } h2 { font-size: 1.25rem; margin-top: 1.4em; } h3 { font-size: 1.05rem; }
+  code, pre { font-family: ui-monospace, monospace; font-size: 0.85em; background: #f1ece7; }
+  pre { padding: 12px; overflow: auto; white-space: pre-wrap; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 0.92em; }
+  td { border: 1px solid #d8d2c9; padding: 6px 8px; }
+  @media print { body { padding: 0; } }
+</style></head><body>
+<p><em>Open this file in a browser → Print → Save as PDF (4–8 pages).</em></p>
+<h1>Design Dossier — Lulu Bakery Web Platform</h1>
+<p><strong>Course:</strong> Professional Responsive Web Platform  <br/><strong>Project:</strong> Multi-page custom cake ordering site for a real local bakery client  <br/><strong>Stack:</strong> Next.js (React) · Tailwind CSS · TypeScript · Supabase  </p>
+<p>Export this Markdown to PDF (4–8 pages) for submission: print from browser or use Pandoc/<code>File → Print → Save as PDF</code>.</p>
+<hr/>
+<h2>1. Target audience &amp; persona</h2>
+<p><strong>Primary persona — Maya, 32</strong>  <br/>Parent in Chino Hills ordering a birthday cake. Needs clear photos, simple size/filling choices, bilingual support, and a trustworthy privacy/contact path. Browses on phone during the day; completes the order on desktop at night.</p>
+<p><strong>Secondary users:</strong> Spanish-speaking family members; guests browsing dessert menus before events.</p>
+<p><strong>Goals:</strong> Find a style quickly → confirm pickup details → submit order with confidence.</p>
+<hr/>
+<h2>2. Information architecture</h2>
+<pre>``<code>
+Home (/)
+├── Showcase (filter + search) → category routes
+│   ├── /cakeformen
+│   ├── /cakeforwomen
+│   ├── /cakeforkids
+│   ├── /cakeforother
+│   └── /sweet → /sweet/photos
+├── Order panel (same page progressive tabs)
+├── About (/about)
+└── Privacy (/privacy)
+Admin (/admin) — staff only, noindex
+</code>`<code></pre>
+<p><strong>Navigation model:</strong> Hierarchical primary nav (Home / About / Dessert Menu / Privacy) + contextual category filters and breadcrumbs on deep pages (</code>/sweet/photos<code>).</p>
+<hr/>
+<h2>3. Wireframe notes (desktop + mobile)</h2>
+<p><strong>Desktop (≥768px)</strong>  <br/>- Sticky header + primary </code>&lt;nav&gt;<code>  <br/>- Hero brand block with one H1 and short intro  <br/>- Product grid: CSS Grid 3 columns  <br/>- Order form: 2-column Grid for fields  </p>
+<p><strong>Mobile (mobile-first)</strong>  <br/>- Nav wraps; sticky bar remains usable  <br/>- Single-column product cards  <br/>- Full-width form controls; large tap targets  </p>
+<hr/>
+<h2>4. Color palette &amp; typography</h2>
+<table><tr><td>Token</td><td>Value</td><td>Role</td></tr>
+</table>
+<table><tr><td>Brand</td><td></code>#5C4B43<code></td><td>Primary buttons / active nav</td></tr>
+<tr><td>Ink</td><td></code>#2F2926<code></td><td>Body text</td></tr>
+<tr><td>Muted</td><td></code>#5E524B<code></td><td>Secondary text</td></tr>
+<tr><td>Border</td><td></code>#D8D2C9<code></td><td>Cards / inputs</td></tr>
+<tr><td>Surface</td><td></code>#F8F7F5<code></td><td>Page background</td></tr>
+</table>
+<strong>Contrast:</strong> Brand brown on white and cream surfaces targets WCAG AA for normal text (≥4.5:1). Focus rings use </code>#8B776A<code> with 3px outline.
+<p><strong>Typography:</strong> Geist Sans via </code>next/font<code> — scale from </code>sm<code> (0.875rem) to </code>2xl<code> (2rem). Spacing tokens: </code>--space-1<code> … </code>--space-8<code>.</p>
+<p><strong>UI components:</strong> Shared </code>SiteHeader<code>, buttons (</code>.ui-button<code>), cards (</code>.ui-card<code>), form inputs, modal dialog, breadcrumbs.</p>
+<hr/>
+<h2>5. Layout techniques demonstrated</h2>
+<p>- <strong>Box model / </code>box-sizing: border-box<code></strong> — global in </code>globals.css<code><br/>- <strong>Flexbox</strong> — header, tab bar, category chips, CTAs<br/>- <strong>CSS Grid</strong> — product showcase, order field layout, step strip<br/>- <strong>Positioning</strong> — sticky header; fixed modal overlay (</code>z-50<code>)<br/>- <strong>Responsive</strong> — </code>sm<code> / </code>md<code> / </code>lg<code> breakpoints (mobile-first)<br/>- <strong>Print stylesheet</strong> — hide chrome; simplify links</p>
+<hr/>
+<h2>6. Interactivity &amp; progressive enhancement</h2>
+<table><tr><td>Feature</td><td>Behavior</td></tr>
+</table>
+<table><tr><td>Debounced search (300ms)</td><td>Filters showcase without full page reload</td></tr>
+<tr><td>Category filter</td><td>Updates route for shareable deep links</td></tr>
+<tr><td>Order form</td><td>HTML5 </code>required<code> + client validation messages</td></tr>
+<tr><td>Success modal</td><td></code>role="dialog"<code>, Esc to close, initial focus</td></tr>
+<tr><td>Without JS</td><td>Pages still render; nav/links work; forms keep native constraints</td></tr>
+</table>
+---
+<h2>7. Accessibility checklist &amp; remediation</h2>
+<p>See </code>docs/accessibility-report.md<code> for tool results and POUR mapping.</p>
+<p><strong>Key remediations shipped:</strong><br/>1. Skip link + </code>#main-content<code> landmark  <br/>2. Semantic primary </code>&lt;nav&gt;<code> + breadcrumbs  <br/>3. Visible </code>:focus-visible<code> styles  <br/>4. Modal ARIA (</code>aria-modal<code>, labelled dialog)  <br/>5. Search labelled; live result count  <br/>6. Product cards expose visible titles (not image-only)  </p>
+<hr/>
+<h2>8. Performance</h2>
+<p>- WebP assets + </code>sharp<code> upload pipeline  <br/>- </code>loading="lazy"<code> / </code>sizes<code> on non-critical images  <br/>- ISR </code>revalidate = 300<code> for product pages  <br/>- Print CSS reduces ink/chrome noise  </p>
+<hr/>
+<h2>9. Testing</h2>
+<p></code>`<code>bash<br/>npm test<br/></code>``</p>
+<p>Includes ≥5 unit tests (search, debounce, order validation) plus axe smoke on landmark structure.<br/></p>
+</body></html>

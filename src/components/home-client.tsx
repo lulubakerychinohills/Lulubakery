@@ -3,17 +3,20 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useId, useMemo, useRef, useState } from "react";
+import Breadcrumbs from "@/components/breadcrumbs";
+import SiteFooter from "@/components/site-footer";
+import SiteHeader, { type SiteLanguage } from "@/components/site-header";
 import {
   DESSERT_MENU_PIXEL_HEIGHT,
   DESSERT_MENU_PIXEL_WIDTH,
   DESSERT_MENU_PUBLIC_PATH,
 } from "@/lib/menu-image";
+import { filterProducts } from "@/lib/product-search";
 import { MAX_IMAGE_UPLOAD_BYTES } from "@/lib/upload-image";
 import PayPalCheckout from "@/components/paypal-checkout";
 
-type TabKey = "showcase" | "order";
-type Language = "zh" | "en" | "es";
+type Language = SiteLanguage;
 type CakeCategory = "men" | "women" | "kids" | "sweet" | "other";
 type CategoryFilter = "all" | CakeCategory;
 type SizeOption = "4" | "6" | "8" | "10" | "double" | "other";
@@ -92,12 +95,6 @@ const fillingOptions: FillingOption[] = ["strawberry", "mango", "durian", "oreo"
 const ORDER_PRODUCT_STORAGE_KEY = "lulu-order-product-id";
 const ORDER_REFERENCE_STORAGE_KEY = "lulu-order-reference-image";
 
-const languageLabels: Record<Language, string> = {
-  zh: "中文",
-  en: "English",
-  es: "Espanol",
-};
-
 const categoryLabels: Record<Language, Record<CategoryFilter, string>> = {
   zh: { all: "全部", men: "男士", women: "女士", kids: "儿童", sweet: "甜品", other: "其他" },
   en: { all: "All", men: "Men", women: "Women", kids: "Kids", sweet: "Desserts", other: "Other" },
@@ -154,6 +151,7 @@ const copy = {
     location: "Chino Hills",
     title: "手作蛋糕与甜点展示",
     intro: "欢迎下单订制蛋糕与甜点。支持选择尺寸、夹馅，并可在线提交订单。",
+    backToGallery: "继续浏览蛋糕",
     tabShowcase: "展示",
     tabOrder: "订购",
     aboutLink: "关于我们",
@@ -168,6 +166,9 @@ const copy = {
     sweetEmpty: "暂无作品图，可先返回价目菜单参考。",
     showcaseTitle: "蛋糕展示",
     showcaseHint: "先选择分类，再点击具体款式查看订购细节。",
+    searchLabel: "搜索款式",
+    searchPlaceholder: "按描述或分类搜索…",
+    searchEmpty: "没有匹配的款式，请换个关键词或分类。",
     showcaseCustomHint: "没有看到想要的款式？你可以上传参考图片，我们会按你的想法沟通定制。",
     orderTitle: "在线下单",
     orderHint: "请填写具体需求，并通过 PayPal 支付订金完成下单。",
@@ -226,6 +227,7 @@ const copy = {
     title: "Custom Cakes & Desserts",
     intro:
       "Welcome to order custom cakes and desserts. Choose size and filling, then submit online.",
+    backToGallery: "Keep browsing cakes",
     tabShowcase: "Showcase",
     tabOrder: "Order",
     aboutLink: "About Us",
@@ -240,6 +242,9 @@ const copy = {
     sweetEmpty: "No photos yet. Go back to the menu for options and pricing.",
     showcaseTitle: "Cake Showcase",
     showcaseHint: "Choose a category first, then open a cake for ordering details.",
+    searchLabel: "Search styles",
+    searchPlaceholder: "Search by description or category…",
+    searchEmpty: "No matching styles. Try another keyword or category.",
     showcaseCustomHint: "If you cannot find the style you want, upload a reference photo for custom discussion.",
     orderTitle: "Place Order",
     orderHint: "Fill in your requirements, then pay a deposit with PayPal to place the order.",
@@ -298,6 +303,7 @@ const copy = {
     title: "Pasteles y Postres Personalizados",
     intro:
       "Bienvenido a pedir pasteles y postres personalizados. Elige tamano y relleno, y envia tu pedido.",
+    backToGallery: "Seguir viendo pasteles",
     tabShowcase: "Galeria",
     tabOrder: "Pedido",
     aboutLink: "Sobre Nosotros",
@@ -312,6 +318,9 @@ const copy = {
     sweetEmpty: "Aun no hay fotos. Vuelve al menu.",
     showcaseTitle: "Galeria de Pasteles",
     showcaseHint: "Primero elige una categoria y luego abre un pastel para ver detalles.",
+    searchLabel: "Buscar estilos",
+    searchPlaceholder: "Busca por descripcion o categoria…",
+    searchEmpty: "Sin coincidencias. Prueba otra palabra o categoria.",
     showcaseCustomHint: "Si no encuentras el estilo que quieres, sube una foto de referencia para personalizar.",
     orderTitle: "Hacer Pedido",
     orderHint: "Completa tus requisitos y paga el deposito con PayPal para confirmar.",
@@ -375,17 +384,22 @@ function WorkShowcaseCard({
   language: Language;
   onSelect: (cake: CakeItem) => void;
 }) {
+  const title =
+    work.descriptionI18n[language]?.trim() ||
+    work.descriptionI18n.en?.trim() ||
+    `${categoryLabels[language][work.category as CakeCategory] ?? work.category} cake`;
+
   return (
     <button
       type="button"
-      className="rounded-xl border border-[#DDD6CE] bg-white p-5 text-left shadow-sm transition hover:border-[#CDBFAF] hover:shadow-md"
+      className="rounded-xl border border-[#DDD6CE] bg-white p-4 text-left shadow-sm transition hover:border-[#CDBFAF] hover:shadow-md focus-ring"
       onClick={() => onSelect(work)}
     >
       {work.imageUrl ? (
         <div className="relative aspect-square overflow-hidden rounded-lg">
           <Image
             src={work.imageUrl}
-            alt={`${categoryLabels[language][work.category as CakeCategory] ?? work.category} cake`}
+            alt={title}
             fill
             unoptimized={work.category === "sweet"}
             loading="lazy"
@@ -396,8 +410,10 @@ function WorkShowcaseCard({
           />
         </div>
       ) : (
-        <div className="aspect-square rounded-lg bg-linear-to-br from-[#EEEAE4] to-[#E8E2D9]" />
+        <div className="aspect-square rounded-lg bg-linear-to-br from-[#EEEAE4] to-[#E8E2D9]" aria-hidden="true" />
       )}
+      <p className="mt-3 line-clamp-2 text-sm font-semibold text-[#4C403A]">{title}</p>
+      <p className="mt-1 text-xs text-[#6A5D56]">{categoryLabels[language][work.category as CakeCategory]}</p>
     </button>
   );
 }
@@ -405,15 +421,21 @@ function WorkShowcaseCard({
 type Props = {
   initialProducts: CakeItem[];
   initialCategory?: CategoryFilter;
-  initialTab?: TabKey;
+  initialTab?: "showcase" | "order";
 };
 
-export default function HomeClient({ initialProducts, initialCategory = "all", initialTab = "showcase" }: Props) {
+export default function HomeClient({ initialProducts, initialCategory = "all" }: Props) {
   const pathname = usePathname();
   const router = useRouter();
+  const searchInputId = useId();
+  const dialogTitleId = useId();
+  const dialogDescId = useId();
+  const closeDialogRef = useRef<HTMLButtonElement>(null);
+  const isOrderPage = pathname === "/order";
   const [language, setLanguage] = useState<Language>("en");
-  const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>(initialCategory);
+  const [searchInput, setSearchInput] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedCake, setSelectedCake] = useState<CakeItem | null>(null);
   const [form, setForm] = useState<OrderForm>(initialForm);
   const [submitting, setSubmitting] = useState(false);
@@ -457,12 +479,14 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
   };
 
   const filteredWorks = useMemo(
-    () =>
-      activeCategory === "all"
-        ? initialProducts
-        : initialProducts.filter((work) => work.category === activeCategory),
-    [activeCategory, initialProducts],
+    () => filterProducts(initialProducts, activeCategory, debouncedSearch),
+    [activeCategory, debouncedSearch, initialProducts],
   );
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedSearch(searchInput), 300);
+    return () => window.clearTimeout(timer);
+  }, [searchInput]);
 
   const focusOrderField = (fieldId: string) => {
     const el = document.getElementById(fieldId);
@@ -535,8 +559,6 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
 
   useEffect(() => {
     if (pathname === "/order") {
-      setActiveTab("order");
-
       const params = new URLSearchParams(window.location.search);
       const productId =
         params.get("product")?.trim() ||
@@ -566,36 +588,32 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
 
     if (pathname === "/sweet/photos") {
       setActiveCategory("sweet");
-      setActiveTab("showcase");
       return;
     }
     const category = routeCategoryMap[pathname];
     if (category) {
       setActiveCategory(category);
-      setActiveTab("showcase");
     }
   }, [pathname, initialProducts]);
 
-  const goShowcaseTab = () => {
-    const targetRoute = categoryRouteMap[activeCategory] || "/";
-    if (pathname === targetRoute) {
-      setActiveTab("showcase");
-      return;
-    }
-    router.push(targetRoute);
-  };
+  useEffect(() => {
+    if (!showSuccessDialog) return;
+    closeDialogRef.current?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setShowSuccessDialog(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = prev;
+    };
+  }, [showSuccessDialog]);
 
-  const goOrderTab = () => {
-    const productId = selectedCake?.id || form.productId.trim();
-    const target = productId ? `/order?product=${encodeURIComponent(productId)}` : "/order";
-    if (pathname === "/order") {
-      setActiveTab("order");
-      if (productId && !window.location.search.includes(productId)) {
-        router.replace(target);
-      }
-      return;
-    }
-    router.push(target);
+  const backToGallery = () => {
+    const targetRoute = categoryRouteMap[activeCategory] || "/";
+    router.push(targetRoute, { scroll: false });
   };
 
   const goOrder = (cake: CakeItem) => {
@@ -691,52 +709,50 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
   };
 
   return (
-    <main className="min-h-screen bg-linear-to-b from-[#F8F7F5] via-[#F6F5F2] to-[#F3F1ED] py-10 text-zinc-800">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-linear-to-b from-[#F8F7F5] via-[#F6F5F2] to-[#F3F1ED] py-6 text-zinc-800 outline-none sm:py-10">
       <div className="mx-auto max-w-6xl px-6">
+        <SiteHeader language={language} onLanguageChange={setLanguage} />
+        {(() => {
+          const homeLabel = language === "zh" ? "首页" : language === "es" ? "Inicio" : "Home";
+          if (isOrderPage) {
+            return (
+              <Breadcrumbs
+                items={[
+                  { href: "/", label: homeLabel },
+                  { label: language === "zh" ? "订购" : language === "es" ? "Pedido" : "Order" },
+                ]}
+              />
+            );
+          }
+          if (pathname === "/sweet/photos") {
+            return (
+              <Breadcrumbs
+                items={[
+                  { href: "/", label: homeLabel },
+                  { href: "/sweet", label: categoryLabels[language].sweet },
+                  {
+                    label:
+                      language === "zh" ? "作品图" : language === "es" ? "Fotos" : "Photos",
+                  },
+                ]}
+              />
+            );
+          }
+          if (activeCategory !== "all" && pathname !== "/") {
+            return (
+              <Breadcrumbs
+                items={[
+                  { href: "/", label: homeLabel },
+                  { label: categoryLabels[language][activeCategory] },
+                ]}
+              />
+            );
+          }
+          return null;
+        })()}
         <section className="overflow-hidden rounded-2xl bg-linear-to-r from-[#E7E3DE] via-[#E3DED8] to-[#DED8D0] shadow-sm">
           <div className="p-5 sm:p-7">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div
-                  className="relative h-12 w-12 cursor-pointer overflow-hidden rounded-full border border-[#D8D2C9] bg-white/90"
-                  onClick={() => router.push("/")}
-                >
-                  <Image src="/brand/avatar.webp" alt="Lulu Bakery avatar" fill className="object-cover" sizes="48px" priority />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-[#4C403A]">{t.brand}</p>
-                  <p className="text-xs text-[#6A5D56]">{t.location}</p>
-                </div>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <select
-                  aria-label="Select language"
-                  value={language}
-                  onChange={(event) => setLanguage(event.target.value as Language)}
-                  className="rounded-full border border-[#D8D2C9] bg-white px-4 py-1.5 text-sm font-semibold text-[#4C403A] outline-none transition focus:border-[#8B776A]"
-                >
-                  {(["en", "zh", "es"] as Language[]).map((lang) => (
-                    <option key={lang} value={lang}>
-                      {languageLabels[lang]}
-                    </option>
-                  ))}
-                </select>
-                <Link
-                  href="/about"
-                  className="rounded-full bg-[#5C4B43] px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-[#4D3F38]"
-                >
-                  {t.aboutLink}
-                </Link>
-                <Link
-                  href="/privacy"
-                  className="rounded-full border border-[#D8D2C9] bg-white px-4 py-1.5 text-sm font-semibold text-[#5C4B43] transition hover:bg-[#F4F1EC]"
-                >
-                  {t.privacyLink}
-                </Link>
-              </div>
-            </div>
-
-            <div className="mt-4 flex items-end justify-between gap-3 sm:mt-5 sm:gap-6">
+            <div className="mt-1 flex items-end justify-between gap-3 sm:gap-6">
               <div className="min-w-0 flex-1">
                 <h1 className="text-3xl font-bold tracking-tight text-[#2F2926] sm:text-4xl">{t.title}</h1>
                 <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-700 sm:text-base">{t.intro}</p>
@@ -767,44 +783,44 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
           </div>
         </section>
 
-        <section className="mt-8 flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            onClick={goShowcaseTab}
-            className={`rounded-full px-5 py-2 text-sm font-semibold transition ${activeTab === "showcase" ? "bg-[#5C4B43] text-white" : "bg-[#EFEAE4] text-[#5C4B43] hover:bg-[#E6DED4]"
-              }`}
-          >
-            {t.tabShowcase}
-          </button>
-          <button
-            type="button"
-            onClick={goOrderTab}
-            className={`rounded-full px-5 py-2 text-sm font-semibold transition ${activeTab === "order" ? "bg-[#5C4B43] text-white" : "bg-[#EFEAE4] text-[#5C4B43] hover:bg-[#E6DED4]"
-              }`}
-          >
-            {t.tabOrder}
-          </button>
-        </section>
 
-        {activeTab === "showcase" && (
+        {!isOrderPage && (
           <section className="mt-8 rounded-2xl border border-[#D8D2C9] bg-white/95 p-6 sm:p-8">
             <h2 className="text-2xl font-semibold">{t.showcaseTitle}</h2>
             <p className="mt-2 text-sm text-zinc-600">{t.showcaseHint}</p>
 
-            <div className="mt-5 flex flex-wrap gap-2">
+            <div className="mt-5" role="search">
+              <label htmlFor={searchInputId} className="text-sm font-semibold text-[#4C403A]">
+                {t.searchLabel}
+              </label>
+              <input
+                id={searchInputId}
+                type="search"
+                value={searchInput}
+                onChange={(event) => setSearchInput(event.target.value)}
+                placeholder={t.searchPlaceholder}
+                className={`${inputClassName} max-w-md focus-ring`}
+                autoComplete="off"
+              />
+              <p className="mt-1 text-xs text-zinc-500" aria-live="polite">
+                {filteredWorks.length} result{filteredWorks.length === 1 ? "" : "s"}
+              </p>
+            </div>
+
+            <div className="mt-5 flex flex-wrap gap-2" role="group" aria-label={t.showcaseTitle}>
               {categories.map((category) => (
                 <button
                   key={category}
                   type="button"
                   onClick={() => {
                     setActiveCategory(category);
-                    setActiveTab("showcase");
                     let targetRoute = categoryRouteMap[category];
                     if (category === "sweet" && pathname === "/sweet/photos") {
                       targetRoute = "/sweet";
                     }
                     if (pathname !== targetRoute) {
-                      router.push(targetRoute);
+                      // Keep scroll position when switching Men / Women / Kids tabs
+                      router.push(targetRoute, { scroll: false });
                     }
                   }}
                   className={`rounded-full px-4 py-2 text-sm font-semibold transition ${category === activeCategory ? "bg-[#5C4B43] text-white" : "bg-[#F1ECE7] text-[#5C4B43] hover:bg-[#E6DED4]"
@@ -893,10 +909,21 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
           </section>
         )}
 
-        {activeTab === "order" && (
-          <section className="mt-8 rounded-2xl border border-[#D8D2C9] bg-white/95 p-6 sm:p-8">
-            <h2 className="text-2xl font-semibold">{t.orderTitle}</h2>
-            <p className="mt-2 text-sm text-zinc-600">{t.orderHint}</p>
+        {isOrderPage && (
+          <section className="mt-8 scroll-mt-24 rounded-2xl border border-[#D8D2C9] bg-white/95 p-6 sm:p-8">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h2 className="text-2xl font-semibold">{t.orderTitle}</h2>
+                <p className="mt-2 text-sm text-zinc-600">{t.orderHint}</p>
+              </div>
+              <button
+                type="button"
+                onClick={backToGallery}
+                className="rounded-full border border-[#D8D2C9] bg-white px-4 py-1.5 text-sm font-semibold text-[#5C4B43] transition hover:bg-[#F4F1EC] focus-ring"
+              >
+                {t.backToGallery}
+              </button>
+            </div>
             <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
               <div className="rounded-lg border border-[#D8D2C9] bg-[#F1ECE7] px-3 py-2 text-xs font-semibold text-[#5C4B43]">
                 {t.orderStep1}
@@ -1299,11 +1326,7 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
           </section>
         )}
       </div>
-      <div className="mx-auto mt-8 max-w-6xl px-6 pb-10 text-center text-xs text-zinc-600">
-        <Link href="/privacy" className="underline decoration-[#8B776A] underline-offset-2">
-          {t.privacyLink}
-        </Link>
-      </div>
+      <SiteFooter language={language} />
       {messageText && fieldErrorId ? (
         <div className="pointer-events-none fixed inset-x-0 top-3 z-50 flex justify-center px-4">
           <p className="pointer-events-auto max-w-lg rounded-xl border-2 border-rose-400 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-900 shadow-lg">
@@ -1317,14 +1340,23 @@ export default function HomeClient({ initialProducts, initialCategory = "all", i
           onClick={() => setShowSuccessDialog(false)}
         >
           <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={dialogTitleId}
+            aria-describedby={dialogDescId}
             className="w-full max-w-md rounded-2xl border border-[#D8D2C9] bg-white p-6 shadow-xl"
             onClick={(event) => event.stopPropagation()}
           >
-            <h3 className="text-lg font-semibold text-zinc-900">{t.successDialogTitle}</h3>
-            <p className="mt-3 text-sm text-zinc-700">{successPaid ? t.successPaidBody : t.successDialogBody}</p>
+            <h3 id={dialogTitleId} className="text-lg font-semibold text-zinc-900">
+              {t.successDialogTitle}
+            </h3>
+            <p id={dialogDescId} className="mt-3 text-sm text-zinc-700">
+              {successPaid ? t.successPaidBody : t.successDialogBody}
+            </p>
             <button
+              ref={closeDialogRef}
               type="button"
-              className="mt-5 rounded-lg bg-[#5C4B43] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#4D3F38]"
+              className="mt-5 rounded-lg bg-[#5C4B43] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#4D3F38] focus-ring"
               onClick={() => setShowSuccessDialog(false)}
             >
               {t.closeDialog}

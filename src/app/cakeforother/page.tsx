@@ -15,5 +15,5 @@ export const metadata: Metadata = {
 
 export default async function CakeForOtherPage() {
   const result = await readProducts();
-  return <HomeClient initialProducts={result.products} initialCategory="other" initialTab="showcase" />;
+  return <HomeClient initialProducts={result.products} initialCategory="other" />;
 }
