@@ -73,8 +73,8 @@ export default function SiteHeader({
 
   return (
     <>
-      <header className="site-header sticky top-0 z-40 -mx-6 mb-6 border-b border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_92%,transparent)] px-6 py-3 backdrop-blur-md print:static print:border-0 print:bg-white">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+      <header className="site-header sticky top-0 z-40 mb-6 w-full border-b border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_95%,transparent)] backdrop-blur-md print:static print:border-0 print:bg-white">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-3">
           <Link href="/" className="flex items-center gap-3 rounded-lg focus-ring">
             <span className="relative h-11 w-11 overflow-hidden rounded-full border border-[var(--color-border)] bg-white/90">
               <Image

@@ -719,9 +719,9 @@ export default function HomeClient({ initialProducts, initialCategory = "all" }:
   };
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen bg-linear-to-b from-[#F8F7F5] via-[#F6F5F2] to-[#F3F1ED] py-6 text-zinc-800 outline-none sm:py-10">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-linear-to-b from-[#F8F7F5] via-[#F6F5F2] to-[#F3F1ED] pb-6 text-zinc-800 outline-none sm:pb-10">
+      <SiteHeader language={language} onLanguageChange={setLanguage} />
       <div className="mx-auto max-w-6xl px-6">
-        <SiteHeader language={language} onLanguageChange={setLanguage} />
         {(() => {
           const homeLabel = language === "zh" ? "首页" : language === "es" ? "Inicio" : "Home";
           if (isOrderPage) {
