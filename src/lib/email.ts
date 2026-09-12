@@ -15,34 +15,34 @@ function getEmailConfig() {
   const notificationEmail = process.env.ORDER_NOTIFICATION_EMAIL;
 
   if (!host || !user || !pass || !from || !notificationEmail) {
-    throw new Error("缺少邮件配置，请先设置 SMTP 与接收邮箱环境变量。");
+    throw new Error("Missing email configuration. Set SMTP and ORDER_NOTIFICATION_EMAIL.");
   }
 
   return { host, port, user, pass, from, notificationEmail };
 }
 
 const categoryMap: Record<string, string> = {
-  men: "男士",
-  women: "女士",
-  kids: "儿童",
-  sweet: "甜品",
-  other: "其他",
+  men: "Men",
+  women: "Women",
+  kids: "Kids",
+  sweet: "Desserts",
+  other: "Other",
 };
 
 const sizeMap: Record<string, string> = {
-  "4": "4寸",
-  "6": "6寸",
-  "8": "8寸",
-  "10": "10寸",
-  double: "双层（6+8）",
+  "4": '4"',
+  "6": '6"',
+  "8": '8"',
+  "10": '10"',
+  double: "Double layer (6+8)",
 };
 
 const fillingMap: Record<string, string> = {
-  strawberry: "草莓",
-  mango: "芒果",
-  durian: "榴莲",
-  oreo: "奥利奥奶油",
-  other: "其他",
+  strawberry: "Strawberry",
+  mango: "Mango",
+  durian: "Durian",
+  oreo: "Oreo cream",
+  other: "Other",
 };
 
 function escapeHtml(input: string) {
@@ -58,10 +58,14 @@ function isPaidOrder(order: MailOrder): order is PaidOrderPayload {
   return "paymentProvider" in order && order.paymentProvider === "paypal";
 }
 
-/** 将 `type="time"` 的 24 小时值（如 14:30）格式化为中文上午/下午 */
-function formatPickupTimeChinese(raw: string): string {
+/** Format `type="time"` values (e.g. 14:30) as 2:30 PM */
+function formatPickupTimeAmPm(raw: string): string {
   const trimmed = raw.trim();
   if (!trimmed) return "";
+
+  if (/\b(am|pm)\b/i.test(trimmed) && !/^\d{1,2}:\d{2}/.test(trimmed)) {
+    return trimmed;
+  }
 
   const amPmMatch = trimmed.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(am|pm)\b/i);
   if (amPmMatch) {
@@ -71,11 +75,7 @@ function formatPickupTimeChinese(raw: string): string {
     if (!Number.isFinite(hour) || hour < 1 || hour > 12) {
       return trimmed;
     }
-    if (isPm && hour !== 12) hour += 12;
-    if (!isPm && hour === 12) hour = 0;
-    const period = hour < 12 ? "上午" : "下午";
-    const displayHour = hour % 12 === 0 ? 12 : hour % 12;
-    return `${period} ${displayHour}:${minute}`;
+    return `${hour}:${minute} ${isPm ? "PM" : "AM"}`;
   }
 
   const match = trimmed.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
@@ -83,15 +83,16 @@ function formatPickupTimeChinese(raw: string): string {
     return trimmed;
   }
 
-  const hour24 = Number.parseInt(match[1], 10);
+  let hour = Number.parseInt(match[1], 10);
   const minute = match[2];
-  if (!Number.isFinite(hour24) || hour24 < 0 || hour24 > 23) {
+  if (!Number.isFinite(hour) || hour < 0 || hour > 23) {
     return trimmed;
   }
 
-  const period = hour24 < 12 ? "上午" : "下午";
-  const displayHour = hour24 % 12 === 0 ? 12 : hour24 % 12;
-  return `${period} ${displayHour}:${minute}`;
+  const period = hour >= 12 ? "PM" : "AM";
+  hour = hour % 12;
+  if (hour === 0) hour = 12;
+  return `${hour}:${minute} ${period}`;
 }
 
 function isHttpUrl(url: string) {
@@ -162,29 +163,29 @@ async function fetchInlineImage(url: string, cid: string, filename: string): Pro
 
 function imageHtmlSection(label: string, cid: string | null, url: string) {
   if (cid) {
-    return `<p><strong>${label}：</strong></p>
+    return `<p><strong>${label}:</strong></p>
       <img src="cid:${cid}" alt="${escapeHtml(label)}" style="max-width:360px;width:100%;border-radius:8px;border:1px solid #eee;object-fit:cover;" />
       ${url ? `<p style="font-size:12px;color:#666;"><a href="${escapeHtml(url)}">${escapeHtml(url)}</a></p>` : ""}`;
   }
   if (url) {
-    return `<p><strong>${label}：</strong></p>
+    return `<p><strong>${label}:</strong></p>
       <img src="${escapeHtml(url)}" alt="${escapeHtml(label)}" style="max-width:360px;width:100%;border-radius:8px;border:1px solid #eee;object-fit:cover;" />
       <p style="font-size:12px;color:#666;"><a href="${escapeHtml(url)}">${escapeHtml(url)}</a></p>`;
   }
-  return `<p><strong>${label}：</strong>未提供</p>`;
+  return `<p><strong>${label}:</strong> Not provided</p>`;
 }
 
 export async function sendOrderEmail(order: MailOrder) {
   const { host, port, user, pass, from, notificationEmail } = getEmailConfig();
   const categoryText = order.productCategory
     ? categoryMap[order.productCategory] || order.productCategory
-    : "未选择（参考图定制）";
-  const productIdText = order.productId ? order.productId.slice(0, 8) : "未选择（参考图定制）";
+    : "Not selected (custom reference)";
+  const productIdText = order.productId ? order.productId.slice(0, 8) : "Not selected (custom reference)";
   const paid = isPaidOrder(order);
-  const pickupTimeText = formatPickupTimeChinese(order.pickupTime);
+  const pickupTimeText = formatPickupTimeAmPm(order.pickupTime);
   const paymentText = paid
-    ? `PayPal 已付订金：${order.amount} ${order.currency}\nPayPal 订单号：${order.paypalOrderId}`
-    : "支付：未通过 PayPal（仅提交意向）";
+    ? `PayPal deposit paid: ${order.amount} ${order.currency}\nPayPal order ID: ${order.paypalOrderId}`
+    : "Payment: not via PayPal (inquiry only)";
 
   const transporter = nodemailer.createTransport({
     host,
@@ -193,7 +194,7 @@ export async function sendOrderEmail(order: MailOrder) {
     auth: { user, pass },
   });
 
-  const contact = [order.phone ? `手机号：${order.phone}` : "", order.email ? `邮箱：${order.email}` : ""]
+  const contact = [order.phone ? `Phone: ${order.phone}` : "", order.email ? `Email: ${order.email}` : ""]
     .filter(Boolean)
     .join("\n");
 
@@ -208,51 +209,51 @@ export async function sendOrderEmail(order: MailOrder) {
   const attachments = [referenceAttachment, productAttachment].filter(Boolean) as Attachment[];
 
   const text = `
-新订单
+New order
 
-姓名：${order.name}
-取货日期：${order.pickupDate}
-取货时间：${pickupTimeText}
+Name: ${order.name}
+Pickup date: ${order.pickupDate}
+Pickup time: ${pickupTimeText}
 ${contact}
 
-分类：${categoryText}
-产品编号：${productIdText}
-尺寸：${sizeMap[order.size] || order.size}
-夹馅：${fillingMap[order.filling] || order.filling}
+Category: ${categoryText}
+Product ID: ${productIdText}
+Size: ${sizeMap[order.size] || order.size}
+Filling: ${fillingMap[order.filling] || order.filling}
 ${paymentText}
-备注：${order.notes || "无"}
-客户参考图：${referenceImageUrl || "未提供"}
-蛋糕图片：${productImageUrl || "未提供"}
+Notes: ${order.notes || "None"}
+Customer reference image: ${referenceImageUrl || "Not provided"}
+Cake image: ${productImageUrl || "Not provided"}
 `.trim();
 
   const html = `
     <div style="font-family:Arial,sans-serif;line-height:1.6;color:#222;">
-      <h2>新订单</h2>
-      <p><strong>姓名：</strong>${escapeHtml(order.name)}</p>
-      <p><strong>取货日期：</strong>${escapeHtml(order.pickupDate)}</p>
-      <p><strong>取货时间：</strong>${escapeHtml(pickupTimeText)}</p>
-      <p><strong>邮箱：</strong>${escapeHtml(order.email)}</p>
-      <p><strong>手机号：</strong>${escapeHtml(order.phone || "未提供")}</p>
-      <p><strong>分类：</strong>${escapeHtml(categoryText)}</p>
-      <p><strong>产品编号：</strong>${escapeHtml(productIdText)}</p>
-      <p><strong>尺寸：</strong>${escapeHtml(sizeMap[order.size] || order.size)}</p>
-      <p><strong>夹馅：</strong>${escapeHtml(fillingMap[order.filling] || order.filling)}</p>
+      <h2>New order</h2>
+      <p><strong>Name:</strong> ${escapeHtml(order.name)}</p>
+      <p><strong>Pickup date:</strong> ${escapeHtml(order.pickupDate)}</p>
+      <p><strong>Pickup time:</strong> ${escapeHtml(pickupTimeText)}</p>
+      <p><strong>Email:</strong> ${escapeHtml(order.email)}</p>
+      <p><strong>Phone:</strong> ${escapeHtml(order.phone || "Not provided")}</p>
+      <p><strong>Category:</strong> ${escapeHtml(categoryText)}</p>
+      <p><strong>Product ID:</strong> ${escapeHtml(productIdText)}</p>
+      <p><strong>Size:</strong> ${escapeHtml(sizeMap[order.size] || order.size)}</p>
+      <p><strong>Filling:</strong> ${escapeHtml(fillingMap[order.filling] || order.filling)}</p>
       ${
         paid
-          ? `<p><strong>PayPal 订金：</strong>${escapeHtml(`${order.amount} ${order.currency}`)}</p>
-             <p><strong>PayPal 订单号：</strong>${escapeHtml(order.paypalOrderId)}</p>`
-          : `<p><strong>支付：</strong>未通过 PayPal（仅提交意向）</p>`
+          ? `<p><strong>PayPal deposit:</strong> ${escapeHtml(`${order.amount} ${order.currency}`)}</p>
+             <p><strong>PayPal order ID:</strong> ${escapeHtml(order.paypalOrderId)}</p>`
+          : `<p><strong>Payment:</strong> Not via PayPal (inquiry only)</p>`
       }
-      <p><strong>备注：</strong>${escapeHtml(order.notes || "无")}</p>
-      ${imageHtmlSection("客户参考图", referenceAttachment?.cid ? "order-reference-image" : null, referenceImageUrl)}
-      ${imageHtmlSection("蛋糕图片", productAttachment?.cid ? "order-product-image" : null, productImageUrl)}
+      <p><strong>Notes:</strong> ${escapeHtml(order.notes || "None")}</p>
+      ${imageHtmlSection("Customer reference image", referenceAttachment?.cid ? "order-reference-image" : null, referenceImageUrl)}
+      ${imageHtmlSection("Cake image", productAttachment?.cid ? "order-product-image" : null, productImageUrl)}
     </div>
   `;
 
   await transporter.sendMail({
     from,
     to: notificationEmail,
-    subject: "新订单",
+    subject: "New order",
     text,
     html,
     attachments,
