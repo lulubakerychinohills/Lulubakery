@@ -8,7 +8,7 @@ export async function POST(request: Request) {
     const body = (await request.json()) as { password?: string };
     const password = typeof body.password === "string" ? body.password : "";
     if (!isAdminPasswordValid(password)) {
-      return NextResponse.json({ message: "密码错误。" }, { status: 401 });
+      return NextResponse.json({ message: "Incorrect password." }, { status: 401 });
     }
 
     const response = NextResponse.json({ ok: true });
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     });
     return response;
   } catch (error) {
-    const message = error instanceof Error ? error.message : "登录失败。";
+    const message = error instanceof Error ? error.message : "Login failed.";
     return NextResponse.json({ message }, { status: 500 });
   }
 }

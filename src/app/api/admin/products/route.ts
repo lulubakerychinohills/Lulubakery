@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
   try {
     const token = request.cookies.get(ADMIN_COOKIE_NAME)?.value;
     if (!isAdminAuthenticated(token)) {
-      return NextResponse.json({ message: "未登录或会话失效。" }, { status: 401 });
+      return NextResponse.json({ message: "Not signed in or session expired." }, { status: 401 });
     }
 
     const body = (await request.json()) as Record<string, unknown>;
@@ -36,18 +36,18 @@ export async function POST(request: NextRequest) {
     const sortOrder = parseOptionalSortOrder(body.sortOrder);
 
     if (!categories.includes(category)) {
-      return NextResponse.json({ message: "分类无效。" }, { status: 400 });
+      return NextResponse.json({ message: "Invalid category." }, { status: 400 });
     }
 
     const product = await addProduct({ category, imageUrl, description, sortOrder });
     revalidateProductsCatalog();
     return NextResponse.json({ ok: true, product });
   } catch (error) {
-    const rawMessage = error instanceof Error ? error.message : "上传失败。";
+    const rawMessage = error instanceof Error ? error.message : "Upload failed.";
     const message = rawMessage.includes("products_category_check")
-      ? "数据库分类约束尚未更新，请先在 Supabase 执行新增 other 分类的 SQL。"
+      ? "Database category constraint is outdated. Run the SQL that adds the other category in Supabase."
       : rawMessage.includes("sort_order")
-        ? "数据库缺少 sort_order 列，请在 Supabase 执行 supabase/migrations 中的 sort_order 迁移 SQL。"
+        ? "Database is missing the sort_order column. Run the sort_order migration SQL in supabase/migrations."
         : rawMessage;
     return NextResponse.json({ message }, { status: 500 });
   }
@@ -57,7 +57,7 @@ export async function PATCH(request: NextRequest) {
   try {
     const token = request.cookies.get(ADMIN_COOKIE_NAME)?.value;
     if (!isAdminAuthenticated(token)) {
-      return NextResponse.json({ message: "未登录或会话失效。" }, { status: 401 });
+      return NextResponse.json({ message: "Not signed in or session expired." }, { status: 401 });
     }
 
     const body = (await request.json()) as Record<string, unknown>;
@@ -65,19 +65,19 @@ export async function PATCH(request: NextRequest) {
     const sortOrder = parseOptionalSortOrder(body.sortOrder);
 
     if (!id) {
-      return NextResponse.json({ message: "缺少产品 id。" }, { status: 400 });
+      return NextResponse.json({ message: "Missing product id." }, { status: 400 });
     }
     if (sortOrder === undefined) {
-      return NextResponse.json({ message: "缺少有效序号 sortOrder。" }, { status: 400 });
+      return NextResponse.json({ message: "Missing a valid sortOrder." }, { status: 400 });
     }
 
     const product = await updateProductSortOrder(id, sortOrder);
     revalidateProductsCatalog();
     return NextResponse.json({ ok: true, product });
   } catch (error) {
-    const rawMessage = error instanceof Error ? error.message : "更新失败。";
+    const rawMessage = error instanceof Error ? error.message : "Update failed.";
     const message = rawMessage.includes("sort_order")
-      ? "数据库缺少 sort_order 列，请在 Supabase 执行迁移 SQL。"
+      ? "Database is missing the sort_order column. Run the migration SQL in Supabase."
       : rawMessage;
     return NextResponse.json({ message }, { status: 500 });
   }

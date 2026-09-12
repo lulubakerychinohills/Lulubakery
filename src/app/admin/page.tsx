@@ -19,11 +19,11 @@ type Notice = {
 };
 
 const categoryLabels: Record<CakeCategory, string> = {
-  men: "男士",
-  women: "女士",
-  kids: "儿童",
-  sweet: "甜品",
-  other: "其他",
+  men: "Men",
+  women: "Women",
+  kids: "Kids",
+  sweet: "Desserts",
+  other: "Other",
 };
 
 function NoticeBanner({ notice }: { notice: Notice }) {
@@ -98,15 +98,15 @@ export default function AdminPage() {
       });
       const result = (await response.json()) as { message?: string };
       if (!response.ok) {
-        throw new Error(result.message || "登录失败。");
+        throw new Error(result.message || "Login failed.");
       }
       setAuthenticated(true);
       setPassword("");
-      setNotice({ kind: "success", text: "登录成功，可以上传产品了。" });
+      setNotice({ kind: "success", text: "Logged in. You can upload products now." });
     } catch (error) {
       setNotice({
         kind: "error",
-        text: error instanceof Error ? error.message : "登录失败。",
+        text: error instanceof Error ? error.message : "Login failed.",
       });
     }
   };
@@ -114,13 +114,13 @@ export default function AdminPage() {
   const onLogout = async () => {
     await fetch("/api/admin/logout", { method: "POST" });
     setAuthenticated(false);
-    setNotice({ kind: "success", text: "已退出登录。" });
+    setNotice({ kind: "success", text: "Logged out." });
   };
 
   const onUpload = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!form.imageUrl.trim()) {
-      setNotice({ kind: "error", text: "请先选择并上传一张产品图片。" });
+      setNotice({ kind: "error", text: "Please choose and upload a product image first." });
       return;
     }
     setNotice(null);
@@ -137,15 +137,15 @@ export default function AdminPage() {
       });
       const result = (await response.json()) as { message?: string };
       if (!response.ok) {
-        throw new Error(result.message || "上传失败。");
+        throw new Error(result.message || "Upload failed.");
       }
-      setNotice({ kind: "success", text: "产品上传成功！前台刷新后即可看到。" });
+      setNotice({ kind: "success", text: "Product uploaded. Refresh the storefront to see it." });
       setForm({ category: form.category, imageUrl: "" });
       await loadProducts();
     } catch (error) {
       setNotice({
         kind: "error",
-        text: error instanceof Error ? error.message : "上传失败。",
+        text: error instanceof Error ? error.message : "Upload failed.",
       });
     } finally {
       setSaving(false);
@@ -158,7 +158,7 @@ export default function AdminPage() {
 
     setNotice(null);
     if (selectedFile.size > MAX_IMAGE_UPLOAD_BYTES) {
-      setNotice({ kind: "error", text: "图片须小于或等于 10MB，请压缩后重试。" });
+      setNotice({ kind: "error", text: "Image must be 10MB or smaller. Please compress and try again." });
       event.target.value = "";
       return;
     }
@@ -174,15 +174,15 @@ export default function AdminPage() {
       });
       const result = (await response.json()) as { message?: string; url?: string };
       if (!response.ok || !result.url) {
-        throw new Error(result.message || "图片上传失败。");
+        throw new Error(result.message || "Image upload failed.");
       }
 
       setForm((prev) => ({ ...prev, imageUrl: result.url! }));
-      setNotice({ kind: "success", text: "图片已选好，确认分类后点「上传产品」。" });
+      setNotice({ kind: "success", text: "Image ready. Confirm the category, then click Upload product." });
     } catch (error) {
       setNotice({
         kind: "error",
-        text: error instanceof Error ? error.message : "图片上传失败。",
+        text: error instanceof Error ? error.message : "Image upload failed.",
       });
     } finally {
       setUploadingImage(false);
@@ -195,18 +195,18 @@ export default function AdminPage() {
   const previewUrl = form.imageUrl.trim();
 
   if (checking) {
-    return <main className="min-h-screen bg-[#F6F5F2] p-8">正在检查登录状态...</main>;
+    return <main className="min-h-screen bg-[#F6F5F2] p-8">Checking login status...</main>;
   }
 
   if (!authenticated) {
     return (
       <main className="min-h-screen bg-[#F6F5F2] p-6 text-zinc-800 sm:p-10">
         <section className="mx-auto max-w-lg rounded-2xl border border-[#D8D2C9] bg-white p-6 shadow-sm">
-          <h1 className="text-2xl font-semibold">产品管理登录</h1>
-          <p className="mt-2 text-sm text-zinc-600">输入密码后即可上传产品。</p>
+          <h1 className="text-2xl font-semibold">Product Admin Login</h1>
+          <p className="mt-2 text-sm text-zinc-600">Enter the password to upload products.</p>
           <form className="mt-5" onSubmit={onLogin}>
             <label>
-              管理密码
+              Admin password
               <input
                 className={inputClass}
                 type="password"
@@ -219,7 +219,7 @@ export default function AdminPage() {
               type="submit"
               className="mt-4 rounded-lg bg-[#5C4B43] px-5 py-2 font-semibold text-white transition hover:bg-[#4D3F38]"
             >
-              登录
+              Log in
             </button>
           </form>
           {notice ? <NoticeBanner notice={notice} /> : null}
@@ -233,30 +233,32 @@ export default function AdminPage() {
       <div className="mx-auto max-w-3xl">
         <section className="rounded-2xl border border-[#D8D2C9] bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between gap-3">
-            <h1 className="text-2xl font-semibold">上传产品</h1>
+            <h1 className="text-2xl font-semibold">Upload product</h1>
             <div className="flex items-center gap-2">
               <Link
                 href="/"
                 className="rounded-lg border border-[#D8D2C9] px-4 py-2 text-sm font-semibold text-[#5C4B43] transition hover:bg-[#F4F1EC]"
               >
-                主页
+                Home
               </Link>
               <button
                 type="button"
                 onClick={onLogout}
                 className="rounded-lg border border-[#D8D2C9] px-4 py-2 text-sm font-semibold text-[#5C4B43] transition hover:bg-[#F4F1EC]"
               >
-                退出
+                Log out
               </button>
             </div>
           </div>
-          <p className="mt-2 text-sm text-zinc-600">选分类 → 选图片 → 上传。新产品会排在最前面。</p>
+          <p className="mt-2 text-sm text-zinc-600">
+            Choose a category → pick an image → upload. New products appear first.
+          </p>
 
           {notice ? <NoticeBanner notice={notice} /> : null}
 
           <form className="mt-6 grid gap-4" onSubmit={onUpload}>
             <label>
-              分类
+              Category
               <select
                 className={inputClass}
                 value={form.category}
@@ -271,18 +273,18 @@ export default function AdminPage() {
             </label>
 
             <div className="rounded-lg border border-[#DDD6CE] bg-[#F4F1EC] p-4">
-              <p className="text-sm font-semibold text-zinc-700">产品图片</p>
-              <p className="mt-1 text-xs text-zinc-500">支持拍照或相册，单张 ≤ 10MB。</p>
+              <p className="text-sm font-semibold text-zinc-700">Product image</p>
+              <p className="mt-1 text-xs text-zinc-500">Camera or photo library; max 10MB per image.</p>
               <label className="mt-3 inline-flex cursor-pointer items-center rounded-lg bg-[#5C4B43] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#4D3F38]">
                 <input type="file" accept=".heic,.heif,image/*" className="hidden" onChange={onPickImage} />
-                {uploadingImage ? "上传中..." : previewUrl ? "重新选图" : "选择 / 拍摄图片"}
+                {uploadingImage ? "Uploading..." : previewUrl ? "Choose another image" : "Choose / take photo"}
               </label>
 
               {previewUrl ? (
                 <div className="relative mt-4 h-48 w-full max-w-xs overflow-hidden rounded-lg border border-[#D8D2C9] bg-white">
                   <Image
                     src={previewUrl}
-                    alt="产品预览图"
+                    alt="Product preview"
                     fill
                     unoptimized={form.category === "sweet"}
                     loading="lazy"
@@ -299,14 +301,14 @@ export default function AdminPage() {
               disabled={saving || uploadingImage || !previewUrl}
               className="rounded-lg bg-[#5C4B43] px-5 py-3 text-base font-semibold text-white transition hover:bg-[#4D3F38] disabled:cursor-not-allowed disabled:bg-[#B8ADA3]"
             >
-              {saving ? "上传中..." : "上传产品"}
+              {saving ? "Uploading..." : "Upload product"}
             </button>
           </form>
         </section>
 
         <section className="mt-6 rounded-2xl border border-[#D8D2C9] bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-semibold">已上传（{products.length}）</h2>
-          <p className="mt-1 text-sm text-zinc-500">按上传时间，最新在上。</p>
+          <h2 className="text-xl font-semibold">Uploaded ({products.length})</h2>
+          <p className="mt-1 text-sm text-zinc-500">Newest first.</p>
           <ul className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5">
             {products.map((item) => (
               <li key={item.id} className="overflow-hidden rounded-lg border border-zinc-200 bg-[#F4F1EC]">
@@ -332,7 +334,7 @@ export default function AdminPage() {
 
         <p className="mt-6 text-center text-sm">
           <Link href="/" className="text-[#5C4B43] underline-offset-2 hover:underline">
-            返回首页
+            Back to home
           </Link>
         </p>
       </div>
