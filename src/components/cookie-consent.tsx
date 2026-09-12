@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const CONSENT_STORAGE_KEY = "lulu-cookie-consent";
@@ -11,24 +10,21 @@ type ConsentLanguage = "zh" | "en" | "es";
 
 const copy: Record<
   ConsentLanguage,
-  { title: string; body: string; privacy: string; accept: string }
+  { title: string; body: string; accept: string }
 > = {
   zh: {
     title: "Cookie 与隐私提示",
-    body: "我们使用 Cookie 及类似技术，用于维持必要功能、改善体验，并在你下单时处理订单相关信息。继续使用本网站即表示你同意我们按隐私政策使用这些信息。",
-    privacy: "隐私政策",
+    body: "我们使用 Cookie 及类似技术，用于维持必要功能、改善体验，并在你下单时处理订单相关信息。继续使用本网站即表示你同意我们按隐私政策（页脚或导航中的 Privacy / 隐私政策）使用这些信息。",
     accept: "我同意",
   },
   en: {
     title: "Cookies & Privacy",
-    body: "We use cookies and similar technologies for essential site features, to improve your experience, and to process order details when you place an order. By continuing, you agree to our use of this information as described in the Privacy Policy.",
-    privacy: "Privacy Policy",
+    body: "We use cookies and similar technologies for essential site features, to improve your experience, and to process order details when you place an order. By continuing, you agree to our use of this information as described in the Privacy Policy (see the site footer or header link).",
     accept: "Accept",
   },
   es: {
     title: "Cookies y Privacidad",
-    body: "Usamos cookies y tecnologias similares para funciones esenciales, mejorar tu experiencia y procesar los datos del pedido cuando ordenas. Al continuar, aceptas el uso de esta informacion segun la Politica de Privacidad.",
-    privacy: "Politica de Privacidad",
+    body: "Usamos cookies y tecnologias similares para funciones esenciales, mejorar tu experiencia y procesar los datos del pedido cuando ordenas. Al continuar, aceptas el uso de esta informacion segun la Politica de Privacidad (enlace en el pie o encabezado).",
     accept: "Aceptar",
   },
 };
@@ -90,10 +86,7 @@ export default function CookieConsent() {
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold text-[#4C403A]">{t.title}</p>
           <p className="mt-1 text-sm leading-relaxed text-zinc-600">
-            {t.body}{" "}
-            <Link href="/privacy" className="font-semibold text-[#5C4B43] underline underline-offset-2 hover:text-[#4D3F38]">
-              {t.privacy}
-            </Link>
+            {t.body}
           </p>
         </div>
         <button

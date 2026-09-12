@@ -391,10 +391,10 @@ function WorkShowcaseCard({
   const categoryLabel = categoryLabels[language][work.category as CakeCategory] ?? work.category;
   const imageAlt =
     language === "zh"
-      ? `${categoryLabel}蛋糕照片：${title}（${work.id.slice(0, 8)}）`
+      ? `蛋糕产品照片 ${work.id.slice(0, 8)}`
       : language === "es"
-        ? `Foto de pastel ${categoryLabel}: ${title} (${work.id.slice(0, 8)})`
-        : `${categoryLabel} cake photo: ${title} (${work.id.slice(0, 8)})`;
+        ? `Foto de producto de pastel ${work.id.slice(0, 8)}`
+        : `Cake product photo ${work.id.slice(0, 8)}`;
 
   return (
     <button
