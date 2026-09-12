@@ -13,6 +13,7 @@ import {
   DESSERT_MENU_PUBLIC_PATH,
 } from "@/lib/menu-image";
 import { filterProducts } from "@/lib/product-search";
+import { ORDER_FIELD_MAX, isValidEmailFormat } from "@/lib/order-field-limits";
 import { MAX_IMAGE_UPLOAD_BYTES } from "@/lib/upload-image";
 import PayPalCheckout from "@/components/paypal-checkout";
 
@@ -215,7 +216,9 @@ const copy = {
     placeholderNotes: "例如：希望周六上午送达，写生日祝福语等",
     placeholderOtherFilling: "例如：榴莲 / 红豆 / 奶酪",
     contactRequired: "请填写邮箱，方便联系。",
+    emailInvalid: "请填写有效的邮箱地址（需包含 @ 和域名）。",
     nameRequired: "请填写姓名。",
+    fieldTooLong: "内容过长，请缩短后再提交。",
     otherSizeRequired: "你选择了其他尺寸，请填写具体尺寸。",
     otherFillingRequired: "你选择了其他夹馅，请填写具体口味。",
     pickupRequired: "请填写取货日期和时间。",
@@ -278,7 +281,9 @@ const copy = {
     depositInvalid: "Please enter a valid deposit (at least $1 USD).",
     placeholderDeposit: "e.g. 50.00",
     contactRequired: "Please provide your email.",
+    emailInvalid: "Please enter a valid email address (include @ and a domain).",
     nameRequired: "Please provide your name.",
+    fieldTooLong: "This field is too long. Please shorten it.",
     otherSizeRequired: "Please enter your custom size.",
     otherFillingRequired: "Please enter your custom filling.",
     pickupRequired: "Please provide pickup date and time.",
@@ -354,7 +359,9 @@ const copy = {
     depositInvalid: "Ingresa un deposito valido (minimo 1 USD).",
     placeholderDeposit: "ej. 50.00",
     contactRequired: "Por favor completa tu correo.",
+    emailInvalid: "Ingresa un correo valido (debe incluir @ y un dominio).",
     nameRequired: "Por favor completa tu nombre.",
+    fieldTooLong: "El texto es demasiado largo. Acortalo por favor.",
     otherSizeRequired: "Elegiste otro tamano. Completa el tamano personalizado.",
     otherFillingRequired: "Elegiste otro relleno. Completa el relleno personalizado.",
     pickupRequired: "Completa fecha y hora de recogida.",
@@ -521,14 +528,35 @@ export default function HomeClient({ initialProducts, initialCategory = "all" }:
     if (!form.name.trim()) {
       return { message: t.nameRequired, fieldId: "order-name" };
     }
+    if (form.name.trim().length > ORDER_FIELD_MAX.name) {
+      return { message: t.fieldTooLong, fieldId: "order-name" };
+    }
     if (!form.email.trim()) {
       return { message: t.contactRequired, fieldId: "order-email" };
+    }
+    if (form.email.trim().length > ORDER_FIELD_MAX.email) {
+      return { message: t.fieldTooLong, fieldId: "order-email" };
+    }
+    if (!isValidEmailFormat(form.email)) {
+      return { message: t.emailInvalid, fieldId: "order-email" };
+    }
+    if (form.phone.trim().length > ORDER_FIELD_MAX.phone) {
+      return { message: t.fieldTooLong, fieldId: "order-phone" };
     }
     if (form.size === "other" && !form.customSize.trim()) {
       return { message: t.otherSizeRequired, fieldId: "order-custom-size" };
     }
+    if (form.customSize.trim().length > ORDER_FIELD_MAX.customSize) {
+      return { message: t.fieldTooLong, fieldId: "order-custom-size" };
+    }
     if (form.filling === "other" && !form.customFilling.trim()) {
       return { message: t.otherFillingRequired, fieldId: "order-custom-filling" };
+    }
+    if (form.customFilling.trim().length > ORDER_FIELD_MAX.customFilling) {
+      return { message: t.fieldTooLong, fieldId: "order-custom-filling" };
+    }
+    if (form.notes.length > ORDER_FIELD_MAX.notes) {
+      return { message: t.fieldTooLong, fieldId: "order-notes" };
     }
     if (!form.pickupDate.trim()) {
       return { message: t.pickupRequired, fieldId: "order-pickup-date" };
@@ -1091,6 +1119,7 @@ export default function HomeClient({ initialProducts, initialCategory = "all" }:
                     id="order-custom-size"
                     className={fieldClass("order-custom-size")}
                     value={form.customSize}
+                    maxLength={ORDER_FIELD_MAX.customSize}
                     onChange={(e) => {
                       setFieldErrorId(null);
                       setForm((prev) => ({ ...prev, customSize: e.target.value }));
@@ -1124,6 +1153,7 @@ export default function HomeClient({ initialProducts, initialCategory = "all" }:
                     id="order-custom-filling"
                     className={fieldClass("order-custom-filling")}
                     value={form.customFilling}
+                    maxLength={ORDER_FIELD_MAX.customFilling}
                     onChange={(e) => {
                       setFieldErrorId(null);
                       setForm((prev) => ({ ...prev, customFilling: e.target.value }));
@@ -1144,6 +1174,7 @@ export default function HomeClient({ initialProducts, initialCategory = "all" }:
                   id="order-name"
                   className={fieldClass("order-name")}
                   value={form.name}
+                  maxLength={ORDER_FIELD_MAX.name}
                   onChange={(e) => {
                     setFieldErrorId(null);
                     setForm((prev) => ({ ...prev, name: e.target.value }));
@@ -1162,6 +1193,7 @@ export default function HomeClient({ initialProducts, initialCategory = "all" }:
                   className={fieldClass("order-email")}
                   type="email"
                   value={form.email}
+                  maxLength={ORDER_FIELD_MAX.email}
                   onChange={(e) => {
                     setFieldErrorId(null);
                     setForm((prev) => ({ ...prev, email: e.target.value }));
@@ -1176,11 +1208,19 @@ export default function HomeClient({ initialProducts, initialCategory = "all" }:
               <label>
                 {t.phone}
                 <input
-                  className={inputClassName}
+                  id="order-phone"
+                  className={fieldClass("order-phone")}
                   value={form.phone}
-                  onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
+                  maxLength={ORDER_FIELD_MAX.phone}
+                  onChange={(e) => {
+                    setFieldErrorId(null);
+                    setForm((prev) => ({ ...prev, phone: e.target.value }));
+                  }}
                   placeholder={t.placeholderPhone}
                 />
+                {fieldErrorId === "order-phone" && messageText ? (
+                  <span className="mt-1 block text-sm font-semibold text-rose-700">{messageText}</span>
+                ) : null}
               </label>
               <label>
                 {t.pickupDate}
@@ -1220,12 +1260,20 @@ export default function HomeClient({ initialProducts, initialCategory = "all" }:
               <label className="sm:col-span-2">
                 {t.notes}
                 <textarea
-                  className={inputClassName}
+                  id="order-notes"
+                  className={fieldClass("order-notes")}
                   value={form.notes}
-                  onChange={(e) => setForm((prev) => ({ ...prev, notes: e.target.value }))}
+                  maxLength={ORDER_FIELD_MAX.notes}
+                  onChange={(e) => {
+                    setFieldErrorId(null);
+                    setForm((prev) => ({ ...prev, notes: e.target.value }));
+                  }}
                   placeholder={t.placeholderNotes}
                   rows={4}
                 />
+                {fieldErrorId === "order-notes" && messageText ? (
+                  <span className="mt-1 block text-sm font-semibold text-rose-700">{messageText}</span>
+                ) : null}
               </label>
               <label className="sm:col-span-2 flex items-start gap-2 text-sm text-zinc-700">
                 <input

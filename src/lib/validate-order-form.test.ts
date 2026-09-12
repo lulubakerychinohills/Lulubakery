@@ -47,4 +47,22 @@ describe("validateOrderForm", () => {
   it("requires privacy consent", () => {
     expect(validateOrderForm({ ...validForm, acceptedPolicy: false }, messages)).toBe("policy");
   });
+
+  it("rejects invalid email format", () => {
+    expect(
+      validateOrderForm(
+        { ...validForm, email: "not-an-email" },
+        { ...messages, emailInvalid: "bad-email" },
+      ),
+    ).toBe("bad-email");
+  });
+
+  it("rejects notes that exceed max length", () => {
+    expect(
+      validateOrderForm(
+        { ...validForm, notes: "x".repeat(1001) },
+        { ...messages, tooLong: "too-long" },
+      ),
+    ).toBe("too-long");
+  });
 });

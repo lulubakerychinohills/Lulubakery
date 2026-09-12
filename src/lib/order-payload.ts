@@ -1,4 +1,5 @@
 import { normalizeSupabaseStoragePublicUrl } from "@/lib/supabase-storage-url";
+import { ORDER_FIELD_MAX, isValidEmailFormat } from "@/lib/order-field-limits";
 
 export type OrderPayload = {
   name: string;
@@ -107,6 +108,9 @@ export function parseOrderBody(body: Record<string, unknown>, request: Request):
 
 export function validateOrderPayload(payload: OrderPayload): string | null {
   if (!payload.name) return "请填写姓名。";
+  if (payload.name.length > ORDER_FIELD_MAX.name) {
+    return `姓名请控制在 ${ORDER_FIELD_MAX.name} 个字符以内。`;
+  }
 
   const hasProductSelection = Boolean(payload.productId);
   const hasReferenceImage = Boolean(payload.referenceImageUrl);
@@ -117,7 +121,25 @@ export function validateOrderPayload(payload: OrderPayload): string | null {
     return "蛋糕分类不能为空。";
   }
   if (!payload.email) return "请提供邮箱。";
+  if (payload.email.length > ORDER_FIELD_MAX.email) {
+    return `邮箱请控制在 ${ORDER_FIELD_MAX.email} 个字符以内。`;
+  }
+  if (!isValidEmailFormat(payload.email)) {
+    return "请填写有效的邮箱地址。";
+  }
+  if (payload.phone.length > ORDER_FIELD_MAX.phone) {
+    return `手机号请控制在 ${ORDER_FIELD_MAX.phone} 个字符以内。`;
+  }
   if (!payload.filling) return "请提供夹馅口味。";
+  if (payload.size.length > ORDER_FIELD_MAX.customSize) {
+    return `尺寸请控制在 ${ORDER_FIELD_MAX.customSize} 个字符以内。`;
+  }
+  if (payload.filling.length > ORDER_FIELD_MAX.customFilling) {
+    return `夹馅请控制在 ${ORDER_FIELD_MAX.customFilling} 个字符以内。`;
+  }
+  if (payload.notes.length > ORDER_FIELD_MAX.notes) {
+    return `备注请控制在 ${ORDER_FIELD_MAX.notes} 个字符以内。`;
+  }
   if (!payload.pickupDate || !payload.pickupTime) return "请提供取货日期和时间。";
   if (!payload.acceptedPolicy) return "请先同意隐私政策。";
   return null;

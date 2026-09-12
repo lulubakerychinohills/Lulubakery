@@ -58,13 +58,24 @@ function isPaidOrder(order: MailOrder): order is PaidOrderPayload {
   return "paymentProvider" in order && order.paymentProvider === "paypal";
 }
 
-/** 将 `type="time"` 的 24 小时值（如 14:30）格式化为 2:30 PM */
-function formatPickupTimeAmPm(raw: string): string {
+/** 将 `type="time"` 的 24 小时值（如 14:30）格式化为中文上午/下午 */
+function formatPickupTimeChinese(raw: string): string {
   const trimmed = raw.trim();
   if (!trimmed) return "";
 
-  if (/\b(am|pm)\b/i.test(trimmed)) {
-    return trimmed;
+  const amPmMatch = trimmed.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(am|pm)\b/i);
+  if (amPmMatch) {
+    let hour = Number.parseInt(amPmMatch[1], 10);
+    const minute = amPmMatch[2];
+    const isPm = amPmMatch[4].toLowerCase() === "pm";
+    if (!Number.isFinite(hour) || hour < 1 || hour > 12) {
+      return trimmed;
+    }
+    if (isPm && hour !== 12) hour += 12;
+    if (!isPm && hour === 12) hour = 0;
+    const period = hour < 12 ? "上午" : "下午";
+    const displayHour = hour % 12 === 0 ? 12 : hour % 12;
+    return `${period} ${displayHour}:${minute}`;
   }
 
   const match = trimmed.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
@@ -72,16 +83,15 @@ function formatPickupTimeAmPm(raw: string): string {
     return trimmed;
   }
 
-  let hour = Number.parseInt(match[1], 10);
+  const hour24 = Number.parseInt(match[1], 10);
   const minute = match[2];
-  if (!Number.isFinite(hour) || hour < 0 || hour > 23) {
+  if (!Number.isFinite(hour24) || hour24 < 0 || hour24 > 23) {
     return trimmed;
   }
 
-  const period = hour >= 12 ? "PM" : "AM";
-  hour = hour % 12;
-  if (hour === 0) hour = 12;
-  return `${hour}:${minute} ${period}`;
+  const period = hour24 < 12 ? "上午" : "下午";
+  const displayHour = hour24 % 12 === 0 ? 12 : hour24 % 12;
+  return `${period} ${displayHour}:${minute}`;
 }
 
 function isHttpUrl(url: string) {
@@ -169,11 +179,11 @@ export async function sendOrderEmail(order: MailOrder) {
   const categoryText = order.productCategory
     ? categoryMap[order.productCategory] || order.productCategory
     : "未选择（参考图定制）";
-  const productIdText = order.productId ? `ID: ${order.productId.slice(0, 8)}` : "未选择（参考图定制）";
+  const productIdText = order.productId ? order.productId.slice(0, 8) : "未选择（参考图定制）";
   const paid = isPaidOrder(order);
-  const pickupTimeText = formatPickupTimeAmPm(order.pickupTime);
+  const pickupTimeText = formatPickupTimeChinese(order.pickupTime);
   const paymentText = paid
-    ? `PayPal 已付订金：${order.amount} ${order.currency}\nPayPal Order：${order.paypalOrderId}`
+    ? `PayPal 已付订金：${order.amount} ${order.currency}\nPayPal 订单号：${order.paypalOrderId}`
     : "支付：未通过 PayPal（仅提交意向）";
 
   const transporter = nodemailer.createTransport({
@@ -206,7 +216,7 @@ export async function sendOrderEmail(order: MailOrder) {
 ${contact}
 
 分类：${categoryText}
-${productIdText}
+产品编号：${productIdText}
 尺寸：${sizeMap[order.size] || order.size}
 夹馅：${fillingMap[order.filling] || order.filling}
 ${paymentText}
@@ -224,14 +234,14 @@ ${paymentText}
       <p><strong>邮箱：</strong>${escapeHtml(order.email)}</p>
       <p><strong>手机号：</strong>${escapeHtml(order.phone || "未提供")}</p>
       <p><strong>分类：</strong>${escapeHtml(categoryText)}</p>
-      <p><strong>产品：</strong>${escapeHtml(productIdText)}</p>
+      <p><strong>产品编号：</strong>${escapeHtml(productIdText)}</p>
       <p><strong>尺寸：</strong>${escapeHtml(sizeMap[order.size] || order.size)}</p>
       <p><strong>夹馅：</strong>${escapeHtml(fillingMap[order.filling] || order.filling)}</p>
       ${
         paid
           ? `<p><strong>PayPal 订金：</strong>${escapeHtml(`${order.amount} ${order.currency}`)}</p>
-             <p><strong>PayPal Order：</strong>${escapeHtml(order.paypalOrderId)}</p>`
-          : `<p><strong>支付：</strong>未通过 PayPal</p>`
+             <p><strong>PayPal 订单号：</strong>${escapeHtml(order.paypalOrderId)}</p>`
+          : `<p><strong>支付：</strong>未通过 PayPal（仅提交意向）</p>`
       }
       <p><strong>备注：</strong>${escapeHtml(order.notes || "无")}</p>
       ${imageHtmlSection("客户参考图", referenceAttachment?.cid ? "order-reference-image" : null, referenceImageUrl)}

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Look &amp; Feel — Lulu Bakery palette</title>
+  <style>
+    :root {
+      --brand: #5c4b43;
+      --ink: #2f2926;
+      --muted: #5e524b;
+      --border: #d8d2c9;
+      --page: #f8f7f5;
+      --surface: #ffffff;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 32px;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--page);
+      color: var(--ink);
+    }
+
+    .slide {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 32px 36px;
+      box-shadow: 0 8px 28px rgba(47, 41, 38, 0.06);
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 1.75rem;
+      color: var(--brand);
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      margin: 0 0 28px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 1.05rem;
+      color: var(--brand);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .swatches,
+    .secondary {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+    }
+
+    .secondary {
+      margin-top: 18px;
+    }
+
+    .swatch {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    .chip {
+      height: 72px;
+    }
+
+    .meta {
+      padding: 10px 12px 12px;
+    }
+
+    .meta strong {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--ink);
+    }
+
+    .meta code {
+      font-size: 0.78rem;
+      color: var(--muted);
+      background: transparent;
+    }
+
+    @media (max-width: 800px) {
+      .swatches,
+      .secondary {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media print {
+      body { padding: 0; background: white; }
+      .slide { box-shadow: none; border: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="slide">
+    <h1>Look &amp; Feel</h1>
+    <p class="subtitle">Lulu Bakery — warm neutrals + bakery brown brand</p>
+
+    <h2>Primary palette</h2>
+    <div class="swatches">
+      <div class="swatch">
+        <div class="chip" style="background:#5C4B43"></div>
+        <div class="meta"><strong>Brand</strong><code>#5C4B43</code></div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background:#2F2926"></div>
+        <div class="meta"><strong>Ink</strong><code>#2F2926</code></div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background:#F8F7F5; border-bottom:1px solid #d8d2c9"></div>
+        <div class="meta"><strong>Page</strong><code>#F8F7F5</code></div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background:#FFFFFF; border-bottom:1px solid #d8d2c9"></div>
+        <div class="meta"><strong>Surface</strong><code>#FFFFFF</code></div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background:#D8D2C9"></div>
+        <div class="meta"><strong>Border</strong><code>#D8D2C9</code></div>
+      </div>
+    </div>
+
+    <h2 style="margin-top:22px">Supporting</h2>
+    <div class="secondary">
+      <div class="swatch">
+        <div class="chip" style="background:#4D3F38"></div>
+        <div class="meta"><strong>Brand hover</strong><code>#4D3F38</code></div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background:#8B776A"></div>
+        <div class="meta"><strong>Brand soft</strong><code>#8B776A</code></div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background:#5E524B"></div>
+        <div class="meta"><strong>Muted text</strong><code>#5E524B</code></div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background:#F1ECE7"></div>
+        <div class="meta"><strong>Surface muted</strong><code>#F1ECE7</code></div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background:linear-gradient(90deg,#E7E3DE,#DED8D0)"></div>
+        <div class="meta"><strong>Hero wash</strong><code>#E7E3DE → #DED8D0</code></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
