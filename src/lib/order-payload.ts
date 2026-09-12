@@ -107,47 +107,49 @@ export function parseOrderBody(body: Record<string, unknown>, request: Request):
 }
 
 export function validateOrderPayload(payload: OrderPayload): string | null {
-  if (!payload.name) return "请填写姓名。";
+  if (!payload.name) return "Please provide your name.";
   if (payload.name.length > ORDER_FIELD_MAX.name) {
-    return `姓名请控制在 ${ORDER_FIELD_MAX.name} 个字符以内。`;
+    return `Name must be ${ORDER_FIELD_MAX.name} characters or fewer.`;
   }
 
   const hasProductSelection = Boolean(payload.productId);
   const hasReferenceImage = Boolean(payload.referenceImageUrl);
   if (!hasProductSelection && !hasReferenceImage) {
-    return "请先选择蛋糕，或上传参考图片。";
+    return "Please select a cake or upload a reference photo.";
   }
   if (payload.productId && !payload.productCategory) {
-    return "蛋糕分类不能为空。";
+    return "Cake category is required.";
   }
-  if (!payload.email) return "请提供邮箱。";
+  if (!payload.email) return "Please provide your email.";
   if (payload.email.length > ORDER_FIELD_MAX.email) {
-    return `邮箱请控制在 ${ORDER_FIELD_MAX.email} 个字符以内。`;
+    return `Email must be ${ORDER_FIELD_MAX.email} characters or fewer.`;
   }
   if (!isValidEmailFormat(payload.email)) {
-    return "请填写有效的邮箱地址。";
+    return "Please enter a valid email address.";
   }
   if (payload.phone.length > ORDER_FIELD_MAX.phone) {
-    return `手机号请控制在 ${ORDER_FIELD_MAX.phone} 个字符以内。`;
+    return `Phone must be ${ORDER_FIELD_MAX.phone} characters or fewer.`;
   }
-  if (!payload.filling) return "请提供夹馅口味。";
+  if (!payload.filling) return "Please provide a filling.";
   if (payload.size.length > ORDER_FIELD_MAX.customSize) {
-    return `尺寸请控制在 ${ORDER_FIELD_MAX.customSize} 个字符以内。`;
+    return `Size must be ${ORDER_FIELD_MAX.customSize} characters or fewer.`;
   }
   if (payload.filling.length > ORDER_FIELD_MAX.customFilling) {
-    return `夹馅请控制在 ${ORDER_FIELD_MAX.customFilling} 个字符以内。`;
+    return `Filling must be ${ORDER_FIELD_MAX.customFilling} characters or fewer.`;
   }
   if (payload.notes.length > ORDER_FIELD_MAX.notes) {
-    return `备注请控制在 ${ORDER_FIELD_MAX.notes} 个字符以内。`;
+    return `Notes must be ${ORDER_FIELD_MAX.notes} characters or fewer.`;
   }
-  if (!payload.pickupDate || !payload.pickupTime) return "请提供取货日期和时间。";
-  if (!payload.acceptedPolicy) return "请先同意隐私政策。";
+  if (!payload.pickupDate || !payload.pickupTime) {
+    return "Please provide pickup date and time.";
+  }
+  if (!payload.acceptedPolicy) return "Please agree to the Privacy Policy.";
   return null;
 }
 
 export function validateDepositAmount(depositAmount: string): string | null {
   if (!normalizeDepositAmount(depositAmount)) {
-    return `请填写有效订金金额（${MIN_DEPOSIT_USD}–${MAX_DEPOSIT_USD} USD）。`;
+    return `Please enter a valid deposit (${MIN_DEPOSIT_USD}–${MAX_DEPOSIT_USD} USD).`;
   }
   return null;
 }

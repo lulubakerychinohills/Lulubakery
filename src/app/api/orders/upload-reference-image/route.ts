@@ -52,25 +52,28 @@ export async function POST(request: NextRequest) {
   try {
     const ip = getClientIp(request);
     if (isRateLimited(ip)) {
-      return NextResponse.json({ message: "上传太频繁，请稍后再试。" }, { status: 429 });
+      return NextResponse.json({ message: "Too many uploads. Please try again shortly." }, { status: 429 });
     }
 
     const formData = await request.formData();
     const file = formData.get("image");
 
     if (!(file instanceof File)) {
-      return NextResponse.json({ message: "未选择图片文件。" }, { status: 400 });
+      return NextResponse.json({ message: "No image file selected." }, { status: 400 });
     }
     if (!isSupportedImageFile(file.type, file.name)) {
-      return NextResponse.json({ message: "只支持图片文件。" }, { status: 400 });
+      return NextResponse.json({ message: "Only image files are supported." }, { status: 400 });
     }
     if (file.size > MAX_IMAGE_UPLOAD_BYTES) {
-      return NextResponse.json({ message: "图片须小于或等于 10MB。" }, { status: 400 });
+      return NextResponse.json({ message: "Image must be 10MB or smaller." }, { status: 400 });
     }
 
     const ext = resolveImageExtension(file.name, file.type);
     if (!ext) {
-      return NextResponse.json({ message: "仅支持 jpg / png / webp / gif / heic / heif。" }, { status: 400 });
+      return NextResponse.json(
+        { message: "Only jpg / png / webp / gif / heic / heif are supported." },
+        { status: 400 },
+      );
     }
 
     const prepared = await prepareImageForUpload(file, ext);
@@ -91,7 +94,7 @@ export async function POST(request: NextRequest) {
     const { data } = supabase.storage.from(bucket).getPublicUrl(storagePath);
     return NextResponse.json({ ok: true, url: data.publicUrl });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "图片上传失败。";
+    const message = error instanceof Error ? error.message : "Image upload failed.";
     return NextResponse.json({ message }, { status: 500 });
   }
 }

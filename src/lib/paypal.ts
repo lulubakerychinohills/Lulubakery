@@ -70,7 +70,7 @@ export async function createPayPalOrder(amount: string, currency: string, descri
   });
   const data = (await response.json()) as PayPalOrderResponse;
   if (!response.ok || !data.id) {
-    const detail = data.details?.[0]?.description || data.message || "创建 PayPal 订单失败。";
+    const detail = data.details?.[0]?.description || data.message || "Could not create PayPal order.";
     throw new Error(detail);
   }
   return data.id;
@@ -87,13 +87,13 @@ export async function capturePayPalOrder(orderId: string) {
   });
   const data = (await response.json()) as PayPalOrderResponse;
   if (!response.ok) {
-    const detail = data.details?.[0]?.description || data.message || "PayPal 扣款失败。";
+    const detail = data.details?.[0]?.description || data.message || "PayPal capture failed.";
     throw new Error(detail);
   }
 
   const capture = data.purchase_units?.[0]?.payments?.captures?.[0];
   if (!capture?.id || capture.status !== "COMPLETED") {
-    throw new Error("PayPal 支付未完成。");
+    throw new Error("PayPal payment was not completed.");
   }
 
   return {

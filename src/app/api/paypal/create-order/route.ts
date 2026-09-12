@@ -12,7 +12,7 @@ export const runtime = "nodejs";
 export async function POST(request: Request) {
   try {
     if (!isPayPalConfigured()) {
-      return NextResponse.json({ message: "PayPal 尚未配置。" }, { status: 503 });
+      return NextResponse.json({ message: "PayPal is not configured." }, { status: 503 });
     }
 
     const body = (await request.json()) as Record<string, unknown>;
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     const orderId = await createPayPalOrder(amount, currency, description);
     return NextResponse.json({ ok: true, orderId, amount, currency });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "创建支付失败。";
+    const message = error instanceof Error ? error.message : "Could not create payment.";
     return NextResponse.json({ message }, { status: 500 });
   }
 }

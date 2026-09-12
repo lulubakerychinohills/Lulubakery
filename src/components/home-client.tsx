@@ -463,6 +463,8 @@ export default function HomeClient({ initialProducts, initialCategory = "all" }:
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [successPaid, setSuccessPaid] = useState(false);
   const t = copy[language];
+  /** Validation / API error copy stays English for demos and consistent UX. */
+  const err = copy.en;
   const depositCurrency = (process.env.NEXT_PUBLIC_PAYPAL_CURRENCY || "USD").trim().toUpperCase() || "USD";
   const normalizedDeposit = (() => {
     const cleaned = form.depositAmount.replace(/[$,\s]/g, "");
@@ -523,49 +525,49 @@ export default function HomeClient({ initialProducts, initialCategory = "all" }:
 
   const validateOrderForm = (): { message: string; fieldId: string } | null => {
     if (!form.productId.trim() && !form.referenceImageUrl.trim()) {
-      return { message: t.pickFirst, fieldId: "order-style" };
+      return { message: err.pickFirst, fieldId: "order-style" };
     }
     if (!form.name.trim()) {
-      return { message: t.nameRequired, fieldId: "order-name" };
+      return { message: err.nameRequired, fieldId: "order-name" };
     }
     if (form.name.trim().length > ORDER_FIELD_MAX.name) {
-      return { message: t.fieldTooLong, fieldId: "order-name" };
+      return { message: err.fieldTooLong, fieldId: "order-name" };
     }
     if (!form.email.trim()) {
-      return { message: t.contactRequired, fieldId: "order-email" };
+      return { message: err.contactRequired, fieldId: "order-email" };
     }
     if (form.email.trim().length > ORDER_FIELD_MAX.email) {
-      return { message: t.fieldTooLong, fieldId: "order-email" };
+      return { message: err.fieldTooLong, fieldId: "order-email" };
     }
     if (!isValidEmailFormat(form.email)) {
-      return { message: t.emailInvalid, fieldId: "order-email" };
+      return { message: err.emailInvalid, fieldId: "order-email" };
     }
     if (form.phone.trim().length > ORDER_FIELD_MAX.phone) {
-      return { message: t.fieldTooLong, fieldId: "order-phone" };
+      return { message: err.fieldTooLong, fieldId: "order-phone" };
     }
     if (form.size === "other" && !form.customSize.trim()) {
-      return { message: t.otherSizeRequired, fieldId: "order-custom-size" };
+      return { message: err.otherSizeRequired, fieldId: "order-custom-size" };
     }
     if (form.customSize.trim().length > ORDER_FIELD_MAX.customSize) {
-      return { message: t.fieldTooLong, fieldId: "order-custom-size" };
+      return { message: err.fieldTooLong, fieldId: "order-custom-size" };
     }
     if (form.filling === "other" && !form.customFilling.trim()) {
-      return { message: t.otherFillingRequired, fieldId: "order-custom-filling" };
+      return { message: err.otherFillingRequired, fieldId: "order-custom-filling" };
     }
     if (form.customFilling.trim().length > ORDER_FIELD_MAX.customFilling) {
-      return { message: t.fieldTooLong, fieldId: "order-custom-filling" };
+      return { message: err.fieldTooLong, fieldId: "order-custom-filling" };
     }
     if (form.notes.length > ORDER_FIELD_MAX.notes) {
-      return { message: t.fieldTooLong, fieldId: "order-notes" };
+      return { message: err.fieldTooLong, fieldId: "order-notes" };
     }
     if (!form.pickupDate.trim()) {
-      return { message: t.pickupRequired, fieldId: "order-pickup-date" };
+      return { message: err.pickupRequired, fieldId: "order-pickup-date" };
     }
     if (!form.pickupTime.trim()) {
-      return { message: t.pickupRequired, fieldId: "order-pickup-time" };
+      return { message: err.pickupRequired, fieldId: "order-pickup-time" };
     }
     if (!form.acceptedPolicy) {
-      return { message: t.policyRequired, fieldId: "order-policy" };
+      return { message: err.policyRequired, fieldId: "order-policy" };
     }
     return null;
   };
@@ -573,11 +575,11 @@ export default function HomeClient({ initialProducts, initialCategory = "all" }:
   const validateDepositField = (): { message: string; fieldId: string } | null => {
     const depositRaw = form.depositAmount.trim();
     if (!depositRaw) {
-      return { message: t.depositRequired, fieldId: "order-deposit" };
+      return { message: err.depositRequired, fieldId: "order-deposit" };
     }
     const depositNum = Number.parseFloat(depositRaw.replace(/[$,\s]/g, ""));
     if (!Number.isFinite(depositNum) || depositNum < 1) {
-      return { message: t.depositInvalid, fieldId: "order-deposit" };
+      return { message: err.depositInvalid, fieldId: "order-deposit" };
     }
     return null;
   };
@@ -670,7 +672,7 @@ export default function HomeClient({ initialProducts, initialCategory = "all" }:
   const onReferenceImageSelected = async (file: File) => {
     setOrderMessage("");
     if (file.size > MAX_IMAGE_UPLOAD_BYTES) {
-      setOrderMessage(t.imageTooLarge);
+      setOrderMessage(err.imageTooLarge);
       return;
     }
     setUploadingReferenceImage(true);
@@ -684,13 +686,13 @@ export default function HomeClient({ initialProducts, initialCategory = "all" }:
       const result = (await response.json()) as { url?: string; message?: string };
       const nextUrl = result.url;
       if (!response.ok || !nextUrl) {
-        throw new Error(result.message || "图片上传失败。");
+        throw new Error(result.message || "Image upload failed.");
       }
       setForm((prev) => ({ ...prev, referenceImageUrl: nextUrl }));
       sessionStorage.setItem(ORDER_REFERENCE_STORAGE_KEY, nextUrl);
       router.push("/order");
     } catch (error) {
-      setOrderMessage(error instanceof Error ? error.message : "图片上传失败。");
+      setOrderMessage(error instanceof Error ? error.message : "Image upload failed.");
     } finally {
       setUploadingReferenceImage(false);
     }
@@ -726,7 +728,7 @@ export default function HomeClient({ initialProducts, initialCategory = "all" }:
 
       const result = (await response.json()) as { message?: string };
       if (!response.ok) {
-        throw new Error(result.message || "提交失败，请稍后重试。");
+        throw new Error(result.message || "Submission failed. Please try again.");
       }
 
       setOrderMessage("");
@@ -740,7 +742,7 @@ export default function HomeClient({ initialProducts, initialCategory = "all" }:
         productImageUrl: prev.productImageUrl,
       }));
     } catch (error) {
-      setOrderMessage(error instanceof Error ? error.message : "提交失败，请稍后重试。");
+      setOrderMessage(error instanceof Error ? error.message : "Submission failed. Please try again.");
     } finally {
       setSubmitting(false);
     }

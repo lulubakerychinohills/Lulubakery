@@ -12,13 +12,13 @@ export const runtime = "nodejs";
 export async function POST(request: Request) {
   try {
     if (!isPayPalConfigured()) {
-      return NextResponse.json({ message: "PayPal 尚未配置。" }, { status: 503 });
+      return NextResponse.json({ message: "PayPal is not configured." }, { status: 503 });
     }
 
     const body = (await request.json()) as Record<string, unknown>;
     const paypalOrderId = typeof body.paypalOrderId === "string" ? body.paypalOrderId.trim() : "";
     if (!paypalOrderId) {
-      return NextResponse.json({ message: "缺少 PayPal 订单号。" }, { status: 400 });
+      return NextResponse.json({ message: "Missing PayPal order id." }, { status: 400 });
     }
 
     const payload = parseOrderBody(body, request);
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
       });
     } catch (error) {
       emailSent = false;
-      emailError = error instanceof Error ? error.message : "订单邮件发送失败。";
+      emailError = error instanceof Error ? error.message : "Order email failed to send.";
       console.error("[paypal/capture-order] email failed:", emailError);
     }
 
@@ -57,7 +57,7 @@ export async function POST(request: Request) {
       emailError: emailSent ? undefined : emailError,
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "支付确认失败。";
+    const message = error instanceof Error ? error.message : "Payment confirmation failed.";
     console.error("[paypal/capture-order]", message);
     return NextResponse.json({ message }, { status: 500 });
   }

@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     await sendOrderEmail(payload);
     return NextResponse.json({ ok: true });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "提交失败，请稍后重试。";
+    const message = error instanceof Error ? error.message : "Submission failed. Please try again.";
     return NextResponse.json({ message }, { status: 500 });
   }
 }
